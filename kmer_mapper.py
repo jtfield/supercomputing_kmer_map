@@ -15,7 +15,12 @@ def main():
 
     read_seq = args.read_seq
 
-    seq_length = len(seq)
+    seq_length = len(read_seq)
     #print(seq_length)
     kmer_len = seq_length / 10
     print(kmer_len)
+    print("waffle")
+
+
+if __name__ == '__main__':
+    main()
