@@ -4,6 +4,7 @@ import numpy
 import subprocess
 import argparse
 from multiprocessing import Pool
+import parmap
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -18,6 +19,13 @@ def kmer_len_gen(s):
     kmer_len = seq_length / 10
     return kmer_len
 
+def kmer_hash_gen(read, k_size):
+    seq_len = len(read)
+    half_read = seq_len / 2
+    kmer_start_pos = half_read - (k_size / 2)
+    kmer_end_pos = half_read + (k_size / 2)
+    return read[kmer_start_pos:kmer_end_pos]
+
 
 def main():
     args = parse_args()
@@ -27,7 +35,6 @@ def main():
     seq = ''
     seperate = ''
     qual = ''
-    read_line_count = 0
     read_list = []
     qual_list = []
     with open(args.read_file_1) as read1:
@@ -37,7 +44,6 @@ def main():
             #
             if len(line) > 0:
                 line_count+=1
-                read_line_count+=1
 
                 if line_count == 1:
                     header = line
@@ -53,8 +59,15 @@ def main():
 
                     # subprocess.call(['./kmer_mapper.py', '--read_seq' , seq])
 
-    p = Pool(args.threads)
-    print(p.map(kmer_len_gen, read_list))
+    p = Pool(int(args.threads))
+
+
+    #print(p.map(kmer_len_gen, read_list))
+    kmer_sizes = (p.map(kmer_len_gen, read_list))
+    print(kmer_sizes)
+
+    kmer_seqs = parmap.starmap(kmer_hash_gen, zip(read_list , kmer_sizes))
+    print(kmer_seqs)
 
 
 
