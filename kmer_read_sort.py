@@ -26,6 +26,23 @@ def kmer_hash_gen(read, k_size):
     kmer_end_pos = half_read + (k_size / 2)
     return read[kmer_start_pos:kmer_end_pos]
 
+def kmer_convert_to_bit(kmer_list):
+    # A = 00
+    # C = 01
+    # G = 10
+    # T = 11
+    hash_kmers = []
+    for letter in kmer_list:
+        if letter == 'A':
+            hash_kmers.append(00)
+        elif letter == 'C':
+            hash_kmers.append(01)
+        elif letter == 'G':
+            hash_kmers.append(10)
+        elif letter == 'T':
+            hash_kmers.append(11)
+    return hash_kmers
+
 
 def main():
     args = parse_args()
@@ -70,7 +87,8 @@ def main():
     kmer_seqs = parmap.starmap(kmer_hash_gen, zip(read_list , kmer_sizes), pm_pbar=True)
     print(kmer_seqs)
 
-
+    kmer_convert = (p.map(kmer_convert_to_bit, kmer_seqs))
+    print(kmer_convert)
 
 
 
