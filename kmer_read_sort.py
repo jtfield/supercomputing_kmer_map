@@ -64,10 +64,13 @@ def main():
 
     #print(p.map(kmer_len_gen, read_list))
     kmer_sizes = (p.map(kmer_len_gen, read_list))
-    print(kmer_sizes)
+    # print(kmer_sizes)
 
-    kmer_seqs = parmap.starmap(kmer_hash_gen, zip(read_list , kmer_sizes))
+    # the pm_pbar=True requres a pip install tqdm
+    kmer_seqs = parmap.starmap(kmer_hash_gen, zip(read_list , kmer_sizes), pm_pbar=True)
     print(kmer_seqs)
+
+
 
 
 
