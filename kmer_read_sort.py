@@ -38,14 +38,15 @@ def kmer_convert_to_bit(kmer_list):
     hash_kmers = []
     for letter in kmer_list:
         if letter == 'A':
-            hash_kmers.append(00)
+            hash_kmers.append('00000000')
         elif letter == 'C':
-            hash_kmers.append(01)
+            hash_kmers.append('00000001')
         elif letter == 'G':
-            hash_kmers.append(10)
+            hash_kmers.append('00000010')
         elif letter == 'T':
-            hash_kmers.append(11)
+            hash_kmers.append('000000011')
     return hash_kmers
+
 
 # convert genome or msa into hash form
 def gen_convert_to_bit(genome_file):
@@ -57,13 +58,13 @@ def gen_convert_to_bit(genome_file):
             if ">" not in line:
                 for letter in line:
                     if letter == 'A':
-                        hash_gen.append(00)
+                        hash_gen.append('00000000')
                     elif letter == 'C':
-                        hash_gen.append(01)
+                        hash_gen.append('00000001')
                     elif letter == 'G':
-                        hash_gen.append(10)
+                        hash_gen.append('00000010')
                     elif letter == 'T':
-                        hash_gen.append(11)
+                        hash_gen.append('000000011')
     return hash_gen
 
 # use the max kmer size to chunk up the genome into kmer sized chunks
@@ -78,6 +79,10 @@ def split_genome(genome_hash_list, max_kmer_len):
         max_kmer_len+=1
     return genome_hash_chunk_array
 
+
+# compare the kmer-bit string from the reads to each kmer-bit string from the genome
+def kmer_matcher(read_kmer_list):
+    
 
 def main():
     args = parse_args()
