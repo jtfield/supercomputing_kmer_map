@@ -80,9 +80,25 @@ def split_genome(genome_hash_list, max_kmer_len):
     return genome_hash_chunk_array
 
 
+# convert list of lists to dictionary of lists with positions as keys
+def list_to_dict(list_of_lists):
+    list_count = 0
+    list_dict = {}
+    for item in list_of_lists:
+        list_count+=1
+        list_dict[list_count] = item
+    return list_dict
+
+
 # compare the kmer-bit string from the reads to each kmer-bit string from the genome
-def kmer_matcher(read_kmer_list):
-    
+# def kmer_matcher(read_kmer_dict, genome_kmer_dict):
+#     matching_kmers = cmp(read_kmer_dict, genome_kmer_dict)
+#     return matching_kmers
+
+def kmer_matcher(dict1, dict2):
+    for key1, value1 in dict1.items():
+        value1 = set(value1)
+        return value1
 
 def main():
     args = parse_args()
@@ -123,6 +139,7 @@ def main():
     kmer_sizes = (p.map(kmer_len_gen, read_list))
     max_kmer_size = max(kmer_sizes)
 
+
     # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
     # the pm_pbar=True requres a pip install tqdm
     kmer_seqs = parmap.starmap(kmer_hash_gen, zip(read_list , kmer_sizes), pm_pbar=True)
@@ -130,7 +147,11 @@ def main():
 
     # CONVERTS KMERS INTO HASH VALUES (A = 00, C = 01, G = 10, T = 11)
     kmer_convert = (p.map(kmer_convert_to_bit, kmer_seqs))
-    # print(kmer_convert)
+    #print(kmer_convert)
+
+    # CONVERT LIST OF KMERS TO A dictionary
+    convert_list_to_dict = list_to_dict(kmer_convert)
+    print(convert_list_to_dict)
 
     # CONVERT GENOME OR MSA TO HASH
     gen_hasher = gen_convert_to_bit(args.genome_file)
@@ -138,7 +159,16 @@ def main():
 
     # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
     hash_gen_chunker = split_genome(gen_hasher, max_kmer_size)
-    print(hash_gen_chunker)
+    #print(type(hash_gen_chunker))
+
+    # CONVERT GENOME LIST OF KMERS TO DICT
+    convert_genome_list_to_dict = list_to_dict(hash_gen_chunker)
+    # print(convert_genome_list_to_dict)
+
+    # ATTEMPTING TO COMPARE EACH READ KMER TO EACH GENOME KMER IN A PARALLEL PROCESS
+    kmer_compare = kmer_matcher(convert_list_to_dict, convert_genome_list_to_dict)
+    #print(kmer_compare)
+
 
 
 if __name__ == '__main__':
