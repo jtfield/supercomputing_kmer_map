@@ -103,19 +103,40 @@ def dict_combiner(read_kmer_dict, genome_kmer_dict):
     new_combined_list = []
     combined_list_count = 0
     for key1, kmer1 in read_kmer_dict.items():
+        combined_list_count+=1
+        temp_combined_dict = {}
         temp_read_kmer_dict = {}
-        temp_genome_kmer_dict = {}
+        #temp_genome_kmer_dict = {}
         read_kmer_key = "kmer_num_" + str(key1)
         temp_read_kmer_dict[read_kmer_key] = kmer1
 
-        # for key2, kmer2 in genome_kmer_dict.items():
-        #     temp_genome_kmer_dict[key2] = kmer2
+        genome_kmer_counter = "genome_kmer_" + str(combined_list_count)
+        read_kmer_counter = "read_kmer_" + str(combined_list_count)
+        temp_combined_dict[read_kmer_counter] = temp_read_kmer_dict
+        temp_combined_dict[genome_kmer_counter] = genome_kmer_dict
 
-        new_combined_list.append(temp_read_kmer_dict)
-        new_combined_list.append(genome_kmer_dict)
-        combined_list_count+=1
-        new_combined_dict[combined_list_count] = new_combined_list
+        # new_combined_list.append(temp_read_kmer_dict)
+        # new_combined_list.append(genome_kmer_dict)
+        # combined_list_count+=1
+        #new_combined_dict[combined_list_count] = new_combined_list
+        combined_read_genome_dict = "combined_read_genome_dict_" + str(combined_list_count)
+        new_combined_dict[combined_read_genome_dict] = temp_combined_dict
     return new_combined_dict
+
+# def kmer_search(kmer_dicts):
+#     list_counter = 0
+#     read_kmer = []
+#     for item in kmer_dicts:
+#         list_counter+=1
+        # print(item)
+        # print(list_counter)
+        # print('\n')
+        # if list_counter == 1:
+        #     print(item)
+        #     read_kmer.append(item)
+        #     if list_counter > 1:
+        #         return item
+
 
 
 def main():
@@ -169,7 +190,7 @@ def main():
 
     # CONVERT LIST OF KMERS TO A dictionary
     convert_list_to_dict = list_to_dict(kmer_convert)
-    #print(convert_list_to_dict)
+    # print(convert_list_to_dict)
 
     # CONVERT GENOME OR MSA TO HASH
     gen_hasher = gen_convert_to_bit(args.genome_file)
@@ -177,20 +198,22 @@ def main():
 
     # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
     hash_gen_chunker = split_genome(gen_hasher, max_kmer_size)
-    #print(type(hash_gen_chunker))
+
 
     # CONVERT GENOME LIST OF KMERS TO DICT
     convert_genome_list_to_dict = list_to_dict(hash_gen_chunker)
     # print(convert_genome_list_to_dict)
 
-    #full_zip = list(zip(convert_list_to_dict, convert_genome_list_to_dict))
 
     # ATTEMPTING TO COMPARE EACH READ KMER TO EACH GENOME KMER IN A PARALLEL PROCESS
     combined_dicts = dict_combiner(convert_list_to_dict, convert_genome_list_to_dict)
-    # print(combined_dicts[1])
+    print(combined_dicts)
 
-    
+    # kmer_match_search = kmer_search(combined_dicts[1])
+    # print(kmer_match_search)
 
+    # kmer_match_search = kmer_search(combined_dicts[2])
+    # print(kmer_match_search)
 
 
 if __name__ == '__main__':
