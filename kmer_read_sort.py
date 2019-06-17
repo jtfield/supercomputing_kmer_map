@@ -5,6 +5,7 @@ import subprocess
 import argparse
 from multiprocessing import Pool
 import parmap
+import json
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -90,12 +91,6 @@ def list_to_dict(list_of_lists):
     return list_dict
 
 
-# compare the kmer-bit string from the reads to each kmer-bit string from the genome
-# def kmer_matcher(read_kmer_dict, genome_kmer_dict):
-#     matching_kmers = cmp(read_kmer_dict, genome_kmer_dict)
-#     return matching_kmers
-
-
 # create new dictionaries containing a single kmer from the read_kmers and the entire dictionary of genome kmers
 # this will be inefficient but i don't know how to do it any other way yet
 def dict_combiner(read_kmer_dict, genome_kmer_dict):
@@ -110,8 +105,10 @@ def dict_combiner(read_kmer_dict, genome_kmer_dict):
         read_kmer_key = "kmer_num_" + str(key1)
         temp_read_kmer_dict[read_kmer_key] = kmer1
 
-        genome_kmer_counter = "genome_kmer_" + str(combined_list_count)
-        read_kmer_counter = "read_kmer_" + str(combined_list_count)
+        #genome_kmer_counter = "genome_kmer_" + str(combined_list_count)
+        #read_kmer_counter = "read_kmer_" + str(combined_list_count)
+        genome_kmer_counter = "genome_kmer_"
+        read_kmer_counter = "read_kmer_"
         temp_combined_dict[read_kmer_counter] = temp_read_kmer_dict
         temp_combined_dict[genome_kmer_counter] = genome_kmer_dict
 
@@ -123,20 +120,12 @@ def dict_combiner(read_kmer_dict, genome_kmer_dict):
         new_combined_dict[combined_read_genome_dict] = temp_combined_dict
     return new_combined_dict
 
-# def kmer_search(kmer_dicts):
-#     list_counter = 0
-#     read_kmer = []
-#     for item in kmer_dicts:
-#         list_counter+=1
-        # print(item)
-        # print(list_counter)
-        # print('\n')
-        # if list_counter == 1:
-        #     print(item)
-        #     read_kmer.append(item)
-        #     if list_counter > 1:
-        #         return item
-
+def kmer_search(kmer_dicts):
+    data = json.loads(kmer_dicts)
+    for key1, dict1 in data.items():
+        read_kmer = dict1['read_kmer_']
+        genome_kmers = dict1['genome_kmer_']
+        return read_kmer
 
 
 def main():
@@ -205,15 +194,17 @@ def main():
     # print(convert_genome_list_to_dict)
 
 
-    # ATTEMPTING TO COMPARE EACH READ KMER TO EACH GENOME KMER IN A PARALLEL PROCESS
+    # CONSTRUCTS A DICT OF DICTS OF DICTS CONTAINING A READ KMER AND THE WHOLE DICTIONARY OF KMERS FROM THE GENOME OR LOCI
     combined_dicts = dict_combiner(convert_list_to_dict, convert_genome_list_to_dict)
-    print(combined_dicts)
+    # print(combined_dicts)
 
-    # kmer_match_search = kmer_search(combined_dicts[1])
-    # print(kmer_match_search)
+    # COMPARES THE READ KMER TO THE ASSOCIATED GENOME KMERS
+    find_matches = (p.map(kmer_search, combined_dicts))
+    print(find_matches)
 
-    # kmer_match_search = kmer_search(combined_dicts[2])
-    # print(kmer_match_search)
+    # for key1, dict1 in combined_dicts.items():
+    #     read_kmer = dict1['read_kmer_']
+    #     genome_kmers = dict1['genome_kmer_']
 
 
 if __name__ == '__main__':
