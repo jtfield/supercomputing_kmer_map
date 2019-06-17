@@ -9,9 +9,9 @@ import parmap
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--read_file_1')
-    #parser.add_argument('--read_file_2')
     parser.add_argument('--genome_file')
     parser.add_argument('--threads')
+    # parser.add_argument('--read_file_2')
     return parser.parse_args()
 
 # get length of reads and find appropriate kmer lengths
@@ -38,13 +38,13 @@ def kmer_convert_to_bit(kmer_list):
     hash_kmers = []
     for letter in kmer_list:
         if letter == 'A':
-            hash_kmers.append('00000000')
+            hash_kmers.append('00')
         elif letter == 'C':
-            hash_kmers.append('00000001')
+            hash_kmers.append('01')
         elif letter == 'G':
-            hash_kmers.append('00000010')
+            hash_kmers.append('10')
         elif letter == 'T':
-            hash_kmers.append('000000011')
+            hash_kmers.append('11')
     return hash_kmers
 
 
@@ -58,13 +58,13 @@ def gen_convert_to_bit(genome_file):
             if ">" not in line:
                 for letter in line:
                     if letter == 'A':
-                        hash_gen.append('00000000')
+                        hash_gen.append('00')
                     elif letter == 'C':
-                        hash_gen.append('00000001')
+                        hash_gen.append('01')
                     elif letter == 'G':
-                        hash_gen.append('00000010')
+                        hash_gen.append('10')
                     elif letter == 'T':
-                        hash_gen.append('000000011')
+                        hash_gen.append('11')
     return hash_gen
 
 # use the max kmer size to chunk up the genome into kmer sized chunks
@@ -95,10 +95,28 @@ def list_to_dict(list_of_lists):
 #     matching_kmers = cmp(read_kmer_dict, genome_kmer_dict)
 #     return matching_kmers
 
-def kmer_matcher(dict1, dict2):
-    for key1, value1 in dict1.items():
-        value1 = set(value1)
-        return value1
+
+# create new dictionaries containing a single kmer from the read_kmers and the entire dictionary of genome kmers
+# this will be inefficient but i don't know how to do it any other way yet
+def dict_combiner(read_kmer_dict, genome_kmer_dict):
+    new_combined_dict = {}
+    new_combined_list = []
+    combined_list_count = 0
+    for key1, kmer1 in read_kmer_dict.items():
+        temp_read_kmer_dict = {}
+        temp_genome_kmer_dict = {}
+        read_kmer_key = "kmer_num_" + str(key1)
+        temp_read_kmer_dict[read_kmer_key] = kmer1
+
+        # for key2, kmer2 in genome_kmer_dict.items():
+        #     temp_genome_kmer_dict[key2] = kmer2
+
+        new_combined_list.append(temp_read_kmer_dict)
+        new_combined_list.append(genome_kmer_dict)
+        combined_list_count+=1
+        new_combined_dict[combined_list_count] = new_combined_list
+    return new_combined_dict
+
 
 def main():
     args = parse_args()
@@ -151,11 +169,11 @@ def main():
 
     # CONVERT LIST OF KMERS TO A dictionary
     convert_list_to_dict = list_to_dict(kmer_convert)
-    print(convert_list_to_dict)
+    #print(convert_list_to_dict)
 
     # CONVERT GENOME OR MSA TO HASH
     gen_hasher = gen_convert_to_bit(args.genome_file)
-    #print(gen_hasher)
+    # print(gen_hasher)
 
     # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
     hash_gen_chunker = split_genome(gen_hasher, max_kmer_size)
@@ -165,9 +183,13 @@ def main():
     convert_genome_list_to_dict = list_to_dict(hash_gen_chunker)
     # print(convert_genome_list_to_dict)
 
+    #full_zip = list(zip(convert_list_to_dict, convert_genome_list_to_dict))
+
     # ATTEMPTING TO COMPARE EACH READ KMER TO EACH GENOME KMER IN A PARALLEL PROCESS
-    kmer_compare = kmer_matcher(convert_list_to_dict, convert_genome_list_to_dict)
-    #print(kmer_compare)
+    combined_dicts = dict_combiner(convert_list_to_dict, convert_genome_list_to_dict)
+    # print(combined_dicts[1])
+
+    
 
 
 
