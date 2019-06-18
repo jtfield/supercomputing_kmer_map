@@ -91,16 +91,24 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
     read_kmer_counter = 0
     for read_kmer in read_kmer_list:
         kmer_len = len(read_kmer)
+        four_percent_of_kmer = 0.04 * kmer_len
+        print(four_percent_of_kmer)
         read_kmer_counter+=1
-        for genome_kmer in genome_kmer_list:
-            print("new_genome_kmer")
-            mismatch_counter = 0
-            correct_match_counter = 0
-            for read_kmer_letter, genome_kmer_letter in zip(read_kmer, genome_kmer):
-                print("set")
-                print("read_kmer_len {}".format(kmer_len))
-                print(read_kmer_letter)
-                print(genome_kmer_letter)
+        if read_kmer_counter > 1:
+            break
+        else:
+            genome_kmer_count = 0
+            for genome_kmer in genome_kmer_list:
+                genome_kmer_count+=1
+                # print("new_genome_kmer")
+                # print("read_kmer_len {}".format(kmer_len))
+                mismatch_counter = 0
+                correct_match_counter = 0
+                for read_kmer_letter, genome_kmer_letter in zip(read_kmer, genome_kmer):
+                    print("set")
+                    #print("read_kmer_len {}".format(kmer_len))
+                    # print(read_kmer_letter)
+                    # print(genome_kmer_letter)
         #         if read_kmer_letter == genome_kmer_letter:
         #             correct_match_counter+=1
         #         elif read_kmer_letter == genome_kmer_letter:
