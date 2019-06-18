@@ -7,7 +7,7 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--read_file_1')
-    # parser.add_argument('--genome_file')
+    parser.add_argument('--genome_file')
     # parser.add_argument('--threads')
     # parser.add_argument('--read_file_2')
     return parser.parse_args()
@@ -21,6 +21,71 @@ def kmer_len_gen(s):
         kmer_len = seq_length / 10
         kmer_lengths.append(kmer_len)
     return kmer_lengths
+
+# get kmer sequences in list form
+def kmer_hash_gen(read, k_size):
+    kmer_list = []
+    for sing_read, size in zip(read, k_size):
+        seq_len = len(sing_read)
+        half_read = seq_len / 2
+        kmer_start_pos = half_read - (size / 2)
+        kmer_end_pos = half_read + (size / 2)
+        kmer = sing_read[kmer_start_pos:kmer_end_pos]
+        kmer_list.append(kmer)
+    return(kmer_list)
+
+# convert kmers into hash forms
+def kmer_convert_to_bit(full_kmer_list):
+    # A = 00
+    # C = 01
+    # G = 10
+    # T = 11
+    hash_kmers = []
+    for seq in full_kmer_list:
+        #print("converting kmers to hash")
+        kmer_seq = []
+        for letter in seq:
+            if letter == 'A':
+                kmer_seq.append('00')
+            elif letter == 'C':
+                kmer_seq.append('01')
+            elif letter == 'G':
+                kmer_seq.append('10')
+            elif letter == 'T':
+                kmer_seq.append('11')
+            hash_kmers.append(kmer_seq)
+    return hash_kmers
+
+# convert genome or msa into hash form
+def gen_convert_to_bit(genome_file):
+    hash_gen = []
+    full_genome = genome_file
+    with open(full_genome) as sequence:
+        for line in sequence:
+            line = line.upper()
+            if ">" not in line:
+                for letter in line:
+                    if letter == 'A':
+                        hash_gen.append('00')
+                    elif letter == 'C':
+                        hash_gen.append('01')
+                    elif letter == 'G':
+                        hash_gen.append('10')
+                    elif letter == 'T':
+                        hash_gen.append('11')
+    return hash_gen
+
+# use the max kmer size to chunk up the genome into kmer sized chunks
+# these chunks should move up the genome 1 nucleotide hash at a time
+def split_genome(genome_hash_list, max_kmer_len):
+    genome_hash_chunk_array = []
+    nuc_pos = 0
+    while max_kmer_len != len(genome_hash_list):
+        window = genome_hash_list[nuc_pos:max_kmer_len]
+        genome_hash_chunk_array.append(window)
+        nuc_pos+=1
+        max_kmer_len+=1
+    return genome_hash_chunk_array
 
 
 
@@ -57,9 +122,25 @@ def main():
 
 #PRODUCES LIST OF LENGTHS OF VARIOUS KMERS IN ORDER FROM FASTQ FILE
     kmer_sizes = kmer_len_gen(read_list)
-    print(kmer_sizes)
+    # print(kmer_sizes)
     max_kmer_size = max(kmer_sizes)
-    print(max_kmer_size)
+    # print(max_kmer_size)
+
+    # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
+    kmer_seqs = kmer_hash_gen(read_list , kmer_sizes)
+    # print(kmer_seqs)
+
+    # CONVERTS KMERS INTO HASH VALUES (A = 00, C = 01, G = 10, T = 11)
+    kmer_convert = kmer_convert_to_bit(kmer_seqs)
+    # print(kmer_convert)
+
+    # CONVERT GENOME OR MSA TO HASH
+    gen_hasher = gen_convert_to_bit(args.genome_file)
+    # print(gen_hasher)
+
+    # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
+    hash_gen_chunker = split_genome(gen_hasher, max_kmer_size)
+    # print(hash_gen_chunker)
 
 if __name__ == '__main__':
     main()
