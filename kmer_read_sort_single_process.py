@@ -87,6 +87,31 @@ def split_genome(genome_hash_list, max_kmer_len):
         max_kmer_len+=1
     return genome_hash_chunk_array
 
+def kmer_matcher(read_kmer_list, genome_kmer_list):
+    read_kmer_counter = 0
+    for read_kmer in read_kmer_list:
+        kmer_len = len(read_kmer)
+        read_kmer_counter+=1
+        for genome_kmer in genome_kmer_list:
+            print("new_genome_kmer")
+            mismatch_counter = 0
+            correct_match_counter = 0
+            for read_kmer_letter, genome_kmer_letter in zip(read_kmer, genome_kmer):
+                print("set")
+                print("read_kmer_len {}".format(kmer_len))
+                print(read_kmer_letter)
+                print(genome_kmer_letter)
+        #         if read_kmer_letter == genome_kmer_letter:
+        #             correct_match_counter+=1
+        #         elif read_kmer_letter == genome_kmer_letter:
+        #             mismatch_counter+=1
+        # print("read_kmer_number")
+        # print(read_kmer_counter)
+        # print("read matches to loci")
+        # print(correct_match_counter)
+        # print("read mismatches loci")
+        # print(mismatch_counter)
+
 
 
 def main():
@@ -141,6 +166,9 @@ def main():
     # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
     hash_gen_chunker = split_genome(gen_hasher, max_kmer_size)
     # print(hash_gen_chunker)
+
+    kmer_search = kmer_matcher(kmer_convert, hash_gen_chunker)
+    print(kmer_search)
 
 if __name__ == '__main__':
     main()
