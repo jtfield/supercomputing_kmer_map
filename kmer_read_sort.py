@@ -116,17 +116,63 @@ def dict_combiner(read_kmer_dict, genome_kmer_dict):
         # new_combined_list.append(genome_kmer_dict)
         # combined_list_count+=1
         #new_combined_dict[combined_list_count] = new_combined_list
-        combined_read_genome_dict = "combined_read_genome_dict_" + str(combined_list_count)
-        new_combined_dict[combined_read_genome_dict] = temp_combined_dict
-    return new_combined_dict
+        # combined_read_genome_dict = "combined_read_genome_dict_" + str(combined_list_count)
+        # new_combined_dict[combined_read_genome_dict] = temp_combined_dict
+        #new_combined_dict[combined_list_count] = temp_combined_dict
+        new_combined_list.append(temp_combined_dict)
+    return new_combined_list
 
-def kmer_search(kmer_dicts):
-    data = json.loads(kmer_dicts)
-    for key1, dict1 in data.items():
-        read_kmer = dict1['read_kmer_']
-        genome_kmers = dict1['genome_kmer_']
-        return read_kmer
+# def kmer_search(kmer_dict):
+#     for key1, item1 in kmer_dict.items():
+#         for key2, item2 in item1.items():
+#             print(key2)
+#             print(item2)
+#             print("waffle")
 
+     # result = last.get_track(num, genome_kmer)
+     # print(result)
+    # for key1, dict1 in kmer_dicts.iteritems():
+    #     read_kmer = dict1['read_kmer_']
+    #     genome_kmers = dict1['genome_kmer_']
+    #     return read_kmer
+
+
+def kmer_search(kmer_list):
+    dict = []
+    dict.append(kmer_list)
+    for item in dict:
+        for item2 in item:
+            read_kmer = ''
+            genome_kmer = ''
+
+            for key, vlaue in item2.items():
+                if key == 'genome_kmer_':
+                    genome_kmer = value
+                elif key == 'read_kmer_':
+                    read_kmer = value
+            return read_kmer
+        # for key1, value1 in item.items():
+        #     read_kmer = ''
+        #     genome_kmer = ''
+        #     if key1 == 'genome_kmer_':
+        #         genome_kmer = key1
+        #     elif key1 == 'read_kmer_':
+        #         read_kmer = key1
+        #     return read_kmer
+
+
+
+        # for key1, value1 in item.items():
+        #     if key1 == 'genome_kmer_':
+        #         genome_kmer = value1
+        #     elif key1 == 'read_kmer_':
+        #         read_kmer = value1
+        # print(read_kmer)
+        # print(genome_kmer)
+        #     for key2, value2 in value1.items():
+        #         print(value2)
+        #         print(key2)
+        #         print("waffle3")
 
 def main():
     args = parse_args()
@@ -196,7 +242,13 @@ def main():
 
     # CONSTRUCTS A DICT OF DICTS OF DICTS CONTAINING A READ KMER AND THE WHOLE DICTIONARY OF KMERS FROM THE GENOME OR LOCI
     combined_dicts = dict_combiner(convert_list_to_dict, convert_genome_list_to_dict)
-    # print(combined_dicts)
+    #print(combined_dicts)
+
+    # defined_dict = dict(combined_dicts)
+    # print(defined_dict)
+
+    # find_matches = kmer_search(combined_dicts)
+    # print(find_matches)
 
     # COMPARES THE READ KMER TO THE ASSOCIATED GENOME KMERS
     find_matches = (p.map(kmer_search, combined_dicts))
