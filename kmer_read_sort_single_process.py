@@ -53,7 +53,7 @@ def kmer_convert_to_bit(full_kmer_list):
                 kmer_seq.append('10')
             elif letter == 'T':
                 kmer_seq.append('11')
-            hash_kmers.append(kmer_seq)
+        hash_kmers.append(kmer_seq)
     return hash_kmers
 
 # convert genome or msa into hash form
@@ -118,66 +118,61 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
         # THIS IS UNNECESSARY TO THE CODE. IT JUST HALTS MAPPING AFTER ONE READ KMER
         # FOR TESTING PURPOSES ONLY
         ##########################################################################
-        if read_kmer_counter > 1:
-            break
+        # if read_kmer_counter > 1:
+        #     break
+        # else:
         ##########################################################################
-        else:
+
 
             # keep track of the position of the genome kmer being mapped to
-            genome_kmer_count = 0
-            genome_kmer_position_tracker = {}
+        genome_kmer_count = 0
+        genome_kmer_position_tracker = {}
 
-            best_match = {}
-            best_match_counter = 0
-            best_match_position = 0
+        best_match = {}
+        best_match_counter = 0
+        best_match_position = 0
 
-            for genome_kmer in genome_kmer_list:
-                genome_kmer_count+=1
-                # genome_kmer_position_tracker = {}
-
-                # best_match = {}
-                # best_match_counter = 0
-                # best_match_position = 0
-
-                mismatch_counter = 0
-                correct_match_counter = 0
-                for read_kmer_letter, genome_kmer_letter in zip(read_kmer, genome_kmer):
-                    #print("read_kmer_len {}".format(kmer_len))
-                    # print(read_kmer_letter)
-                    # print(genome_kmer_letter)
-                    if read_kmer_letter == genome_kmer_letter:
-                        correct_match_counter+=1
-                    elif read_kmer_letter == genome_kmer_letter:
-                        mismatch_counter+=1
-
-                if mismatch_counter >= mismatch_threshold:
-                    print("skip")
-
-                elif mismatch_counter < mismatch_threshold:
-                    genome_kmer_position_tracker[genome_kmer_count] = correct_match_counter
+        for genome_kmer in genome_kmer_list:
+            genome_kmer_count+=1
 
 
-                if correct_match_counter > best_match_counter:
-                    best_match_counter = correct_match_counter
-                    best_match_position = genome_kmer_count
-                    # best_match[best_match_position] = best_match_counter
-                elif correct_match_counter <= best_match_counter:
-                    best_match_counter = best_match_counter
-                    best_match_position = best_match_position
+            mismatch_counter = 0
+            correct_match_counter = 0
+            for read_kmer_letter, genome_kmer_letter in zip(read_kmer, genome_kmer):
+
+                if read_kmer_letter == genome_kmer_letter:
+                    correct_match_counter+=1
+                elif read_kmer_letter == genome_kmer_letter:
+                    mismatch_counter+=1
+
+            # if mismatch_counter >= mismatch_threshold:
+            #     print("skip")
+            #
+            # elif mismatch_counter > mismatch_threshold:
+            genome_kmer_position_tracker[genome_kmer_count] = correct_match_counter
 
 
-                read_kmer_stats['genome_kmer_mapping_stats'] = genome_kmer_position_tracker
-            best_match[best_match_position] = best_match_counter
-            read_kmer_stats['best_match_stats'] = best_match
+            if correct_match_counter > best_match_counter:
+                best_match_counter = correct_match_counter
+                best_match_position = genome_kmer_count
+
+            elif correct_match_counter <= best_match_counter:
+                best_match_counter = best_match_counter
+                best_match_position = best_match_position
+
+
+            read_kmer_stats['genome_kmer_mapping_stats'] = genome_kmer_position_tracker
+        best_match[best_match_position] = best_match_counter
+        read_kmer_stats['best_match_stats'] = best_match
 
 
         master_kmer_stats_dict.append(read_kmer_stats)
     return master_kmer_stats_dict
-    for key in master_kmer_stats_dict:
-        find_max = key['genome_kmer_mapping_stats']
-
-        inverse = [(value, key) for key, value in find_max.items()]
-        print max(inverse)[1]
+    # for key in master_kmer_stats_dict:
+    #     find_max = key['genome_kmer_mapping_stats']
+    #
+    #     inverse = [(value, key) for key, value in find_max.items()]
+    #     print max(inverse)[1]
 
 
 
@@ -231,10 +226,18 @@ def main():
     # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
     kmer_seqs = kmer_hash_gen(read_list , kmer_sizes)
     # print(kmer_seqs)
+    # counters = 0
+    # for i in kmer_seqs:
+    #     print(i)
+    #     counters+=1
+    # print(counters)
 
     # CONVERTS KMERS INTO HASH VALUES (A = 00, C = 01, G = 10, T = 11)
     kmer_convert = kmer_convert_to_bit(kmer_seqs)
-    # print(kmer_convert)
+    # counters = 0
+    # for i in kmer_convert:
+    #     counters+=1
+    # print(counters)
 
     # CONVERT GENOME OR MSA TO HASH
     gen_hasher = gen_convert_to_bit(args.genome_file)
