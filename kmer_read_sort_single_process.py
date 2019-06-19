@@ -87,12 +87,32 @@ def split_genome(genome_hash_list, max_kmer_len):
         max_kmer_len+=1
     return genome_hash_chunk_array
 
+
+# begin mapping the read kmers to the genome kmers
 def kmer_matcher(read_kmer_list, genome_kmer_list):
+    # initialize list to collect all information about kmer mappings
+    # initialize a counter to keep track of which kmer is which
     read_kmer_counter = 0
+    master_kmer_stats_list = []
+
+    # loop through the read kmers and prepare to map each read kmer to each genome kmer
     for read_kmer in read_kmer_list:
+
+        # initialize a list to hold the stats for each read kmer
+        # this will be added to the master kmer info list
+        read_kmer_stats = []
+
+        # get the length of the kmer to identify mismatch threshold
+        mismatch_threshold = 0
         kmer_len = len(read_kmer)
         four_percent_of_kmer = 0.04 * kmer_len
-        print(four_percent_of_kmer)
+        if four_percent_of_kmer < 1:
+            mismatch_threshold = 1
+        elif four_percent_of_kmer >= 1:
+            mismatch_threshold = round(four_percent_of_kmer)
+            
+
+
         read_kmer_counter+=1
         if read_kmer_counter > 1:
             break
