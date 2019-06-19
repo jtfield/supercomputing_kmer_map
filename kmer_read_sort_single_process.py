@@ -93,14 +93,16 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
     # initialize list to collect all information about kmer mappings
     # initialize a counter to keep track of which kmer is which
     read_kmer_counter = 0
-    master_kmer_stats_list = []
+    master_kmer_stats_dict = []
 
     # loop through the read kmers and prepare to map each read kmer to each genome kmer
     for read_kmer in read_kmer_list:
+        read_kmer_counter+=1
 
         # initialize a list to hold the stats for each read kmer
         # this will be added to the master kmer info list
-        read_kmer_stats = []
+        read_kmer_stats = {}
+        read_kmer_stats['read_number'] = read_kmer_counter
 
         # get the length of the kmer to identify mismatch threshold
         mismatch_threshold = 0
@@ -110,29 +112,46 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
             mismatch_threshold = 1
         elif four_percent_of_kmer >= 1:
             mismatch_threshold = round(four_percent_of_kmer)
-            
+        read_kmer_stats['mismatch_threshold'] = mismatch_threshold
+        read_kmer_stats['kmer_length'] = kmer_len
 
-
-        read_kmer_counter+=1
+        # THIS IS UNNECESSARY TO THE CODE. IT JUST HALTS MAPPING AFTER ONE READ KMER
+        # FOR TESTING PURPOSES ONLY
+        ##########################################################################
         if read_kmer_counter > 1:
             break
+        ##########################################################################
         else:
+
+            # keep track of the position of the genome kmer being mapped to
             genome_kmer_count = 0
+            genome_kmer_position_tracker = {}
             for genome_kmer in genome_kmer_list:
                 genome_kmer_count+=1
+                # genome_kmer_position_tracker = {}
+
                 # print("new_genome_kmer")
                 # print("read_kmer_len {}".format(kmer_len))
                 mismatch_counter = 0
                 correct_match_counter = 0
                 for read_kmer_letter, genome_kmer_letter in zip(read_kmer, genome_kmer):
-                    print("set")
                     #print("read_kmer_len {}".format(kmer_len))
                     # print(read_kmer_letter)
                     # print(genome_kmer_letter)
-        #         if read_kmer_letter == genome_kmer_letter:
-        #             correct_match_counter+=1
-        #         elif read_kmer_letter == genome_kmer_letter:
-        #             mismatch_counter+=1
+                    if read_kmer_letter == genome_kmer_letter:
+                        correct_match_counter+=1
+                    elif read_kmer_letter == genome_kmer_letter:
+                        mismatch_counter+=1
+
+                if mismatch_counter >= mismatch_threshold:
+                    continue
+
+                elif mismatch_counter < mismatch_threshold:
+                    genome_kmer_position_tracker[genome_kmer_count] = correct_match_counter
+
+                read_kmer_stats['genome_kmer_mapping_stats'] = genome_kmer_position_tracker
+        master_kmer_stats_dict.append(read_kmer_stats)
+    return master_kmer_stats_dict
         # print("read_kmer_number")
         # print(read_kmer_counter)
         # print("read matches to loci")
