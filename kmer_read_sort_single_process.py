@@ -126,12 +126,19 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
             # keep track of the position of the genome kmer being mapped to
             genome_kmer_count = 0
             genome_kmer_position_tracker = {}
+
+            best_match = {}
+            best_match_counter = 0
+            best_match_position = 0
+
             for genome_kmer in genome_kmer_list:
                 genome_kmer_count+=1
                 # genome_kmer_position_tracker = {}
 
-                # print("new_genome_kmer")
-                # print("read_kmer_len {}".format(kmer_len))
+                # best_match = {}
+                # best_match_counter = 0
+                # best_match_position = 0
+
                 mismatch_counter = 0
                 correct_match_counter = 0
                 for read_kmer_letter, genome_kmer_letter in zip(read_kmer, genome_kmer):
@@ -144,14 +151,37 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
                         mismatch_counter+=1
 
                 if mismatch_counter >= mismatch_threshold:
-                    continue
+                    print("skip")
 
                 elif mismatch_counter < mismatch_threshold:
                     genome_kmer_position_tracker[genome_kmer_count] = correct_match_counter
 
+
+                if correct_match_counter > best_match_counter:
+                    best_match_counter = correct_match_counter
+                    best_match_position = genome_kmer_count
+                    # best_match[best_match_position] = best_match_counter
+                elif correct_match_counter <= best_match_counter:
+                    best_match_counter = best_match_counter
+                    best_match_position = best_match_position
+
+
                 read_kmer_stats['genome_kmer_mapping_stats'] = genome_kmer_position_tracker
+            best_match[best_match_position] = best_match_counter
+            read_kmer_stats['best_match_stats'] = best_match
+
+
         master_kmer_stats_dict.append(read_kmer_stats)
     return master_kmer_stats_dict
+    for key in master_kmer_stats_dict:
+        find_max = key['genome_kmer_mapping_stats']
+
+        inverse = [(value, key) for key, value in find_max.items()]
+        print max(inverse)[1]
+
+
+
+    #return master_kmer_stats_dict
         # print("read_kmer_number")
         # print(read_kmer_counter)
         # print("read matches to loci")
