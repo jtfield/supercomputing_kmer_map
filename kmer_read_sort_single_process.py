@@ -128,7 +128,8 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
         genome_kmer_count = 0
         genome_kmer_position_tracker = {}
 
-        best_match = {}
+        best_match_loc = {}
+        best_match_score = {}
         best_match_counter = 0
         best_match_position = 0
 
@@ -162,8 +163,12 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
 
 
             read_kmer_stats['genome_kmer_mapping_stats'] = genome_kmer_position_tracker
-        best_match[best_match_position] = best_match_counter
-        read_kmer_stats['best_match_stats'] = best_match
+        # best_match_loc[best_match_position] = best_match_counter
+        # best_match_loc['best_match_loc'] = best_match_position
+        # best_match_score['best_match_score'] = best_match_counter
+        read_kmer_stats['best_match_score'] = best_match_counter
+        read_kmer_stats['best_match_loc'] = best_match_position
+
 
 
         master_kmer_stats_dict.append(read_kmer_stats)
@@ -185,13 +190,22 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
         # print(mismatch_counter)
 
 # match kmers to reads and begin mapping reads to the locations associated with the kmers
-def read_kmer_matcher(kmer_list_of_dicts, read_list):
+def read_kmer_matcher(kmer_list_of_dicts, read_list, byte_genome):
     for kmer_dict in kmer_list_of_dicts:
         read_count = 0
         kmer_id = kmer_dict['read_number']
-        for read_id in read_list:
+        for read_seq in read_list:
             read_count+=1
-        print(kmer_id)
+            kmer_loc = ''
+            if kmer_id == read_count:
+                kmer_loc = kmer_dict['best_match_loc']
+
+            genome_letter_position = 0
+            for letter in byte_genome:
+                genome_letter_position+=1
+                if genome_letter_position == kmer_loc:
+                    print(genome_letter_position)
+                    print(kmer_loc)
 
 
 def main():
@@ -259,13 +273,14 @@ def main():
     # MAP ALL READ KMERS TO ALL GENOME KMERS AND CONSTRUCT DICT
     # DICT CONTAINS INFO ON BEST MAP LOCATION WITHIN THE GENOME KMERS
     kmer_search1 = kmer_matcher(kmer_convert1, hash_gen_chunker1)
-    # print(kmer_search1)
+    #print(kmer_search1)
 
-    #
+    # CONVERT READS TO BYTES
     read_convert = kmer_convert_to_bit(read_list)
     # print(read_convert)
 
-    kmer_and_read_matcher = read_kmer_matcher(kmer_search1, read_list)
+    #
+    kmer_and_read_matcher = read_kmer_matcher(kmer_search1, read_list, gen_hasher1)
     print(kmer_and_read_matcher)
 
 if __name__ == '__main__':
