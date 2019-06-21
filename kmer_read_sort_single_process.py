@@ -206,33 +206,59 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
 
 # match kmers to reads and begin mapping reads to the locations associated with the kmers
 def read_kmer_matcher(kmer_list_of_dicts, read_list, byte_genome):
+    # print(byte_genome)
     for kmer_dict in kmer_list_of_dicts:
         read_count = 0
         kmer_id = kmer_dict['read_number']
-        for read_seq in read_list:
-            read_len = len(read_seq)
-            read_count+=1
-            kmer_loc = 0
-            if kmer_id == read_count:
-                kmer_loc = kmer_dict['best_match_loc']
+        pos_id = kmer_dict['best_match_loc']
 
-            genome_letter_position = 0
-            read_len_counter = 0
-            mapping_comparison_segment = []
-            genome_segment = byte_genome[int(kmer_loc):int(read_len)]
-            # mapping_comparison_segment.append(read_seq)
-            # genome_segment = []
-            # for letter in byte_genome:
-            #     genome_letter_position+=1
-            #     if genome_letter_position >= kmer_loc:
-            #         read_len_counter+=1
-            #         if read_len_counter <= read_len:
-                        # genome_segment.append(letter)
-            print(genome_segment)
-            print(read_seq)
-            mapping_comparison_segment.append(read_seq)
-            mapping_comparison_segment.append(genome_segment)
+        genome_pos = pos_id - 1
+
+        read_count = 0
+        for read in read_list:
+            read_len = len(read)
+            read_count+=1
+            segment_end = (pos_id + read_len) - 1
+            combined_list = []
+            if kmer_id == read_count:
+                print(genome_pos)
+                print(segment_end)
+                print(byte_genome[genome_pos:segment_end])
+                print(read)
+                print("start over")
+                # genome_segment = byte_genome[genome_pos:read_len]
+                # print(read)
+                # print(genome_segment)
+                # print("start over")
+
+
+
+        # for read_seq in read_list:
+        #     read_len = len(read_seq)
+        #     read_count+=1
+        #     kmer_loc = 0
+        #     if kmer_id == read_count:
+        #         kmer_loc = kmer_dict['best_match_loc']
+        #
+        #         genome_letter_position = 0
+        #         read_len_counter = 0
+        #         mapping_comparison_segment = []
+        #         genome_segment = byte_genome[int(kmer_loc):int(read_len)]
+        #         # mapping_comparison_segment.append(read_seq)
+        #         # genome_segment = []
+        #         # for letter in byte_genome:
+        #         #     genome_letter_position+=1
+        #         #     if genome_letter_position >= kmer_loc:
+        #         #         read_len_counter+=1
+        #         #         if read_len_counter <= read_len:
+        #                     # genome_segment.append(letter)
+        #
+        #         # print(read_seq)
+        #         # print(genome_segment)
+        #     mapping_comparison_segment.append(read_seq)
+        #     mapping_comparison_segment.append(genome_segment)
             #print(mapping_comparison_segment)
+
 
 
 
