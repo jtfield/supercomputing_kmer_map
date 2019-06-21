@@ -184,10 +184,19 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
         # print("read mismatches loci")
         # print(mismatch_counter)
 
+# match kmers to reads and begin mapping reads to the locations associated with the kmers
+def read_kmer_matcher(kmer_list_of_dicts, read_list):
+    for kmer_dict in kmer_list_of_dicts:
+        read_count = 0
+        kmer_id = kmer_dict['read_number']
+        for read_id in read_list:
+            read_count+=1
+        print(kmer_id)
 
 
 def main():
     args = parse_args()
+
     # GET READ LEN TO EXTRAPOLATE KMER LENGTH
     line_count = 0
     header = ''
@@ -218,13 +227,13 @@ def main():
 
 
 #PRODUCES LIST OF LENGTHS OF VARIOUS KMERS IN ORDER FROM FASTQ FILE
-    kmer_sizes = kmer_len_gen(read_list)
+    kmer_sizes1 = kmer_len_gen(read_list)
     # print(kmer_sizes)
-    max_kmer_size = max(kmer_sizes)
+    max_kmer_size1 = max(kmer_sizes1)
     # print(max_kmer_size)
 
     # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
-    kmer_seqs = kmer_hash_gen(read_list , kmer_sizes)
+    kmer_seqs1 = kmer_hash_gen(read_list , kmer_sizes1)
     # print(kmer_seqs)
     # counters = 0
     # for i in kmer_seqs:
@@ -233,22 +242,31 @@ def main():
     # print(counters)
 
     # CONVERTS KMERS INTO HASH VALUES (A = 00, C = 01, G = 10, T = 11)
-    kmer_convert = kmer_convert_to_bit(kmer_seqs)
+    kmer_convert1 = kmer_convert_to_bit(kmer_seqs1)
     # counters = 0
     # for i in kmer_convert:
     #     counters+=1
     # print(counters)
 
     # CONVERT GENOME OR MSA TO HASH
-    gen_hasher = gen_convert_to_bit(args.genome_file)
+    gen_hasher1 = gen_convert_to_bit(args.genome_file)
     # print(gen_hasher)
 
     # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
-    hash_gen_chunker = split_genome(gen_hasher, max_kmer_size)
+    hash_gen_chunker1 = split_genome(gen_hasher1, max_kmer_size1)
     # print(hash_gen_chunker)
 
-    kmer_search = kmer_matcher(kmer_convert, hash_gen_chunker)
-    print(kmer_search)
+    # MAP ALL READ KMERS TO ALL GENOME KMERS AND CONSTRUCT DICT
+    # DICT CONTAINS INFO ON BEST MAP LOCATION WITHIN THE GENOME KMERS
+    kmer_search1 = kmer_matcher(kmer_convert1, hash_gen_chunker1)
+    # print(kmer_search1)
+
+    #
+    read_convert = kmer_convert_to_bit(read_list)
+    # print(read_convert)
+
+    kmer_and_read_matcher = read_kmer_matcher(kmer_search1, read_list)
+    print(kmer_and_read_matcher)
 
 if __name__ == '__main__':
     main()
