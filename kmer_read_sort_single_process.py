@@ -24,15 +24,29 @@ def kmer_len_gen(s):
 
 # get kmer sequences in list form
 def kmer_hash_gen(read, k_size):
+#################################################################
+# code for getting kmer from the beginning of read
     kmer_list = []
     for sing_read, size in zip(read, k_size):
         seq_len = len(sing_read)
-        half_read = seq_len / 2
-        kmer_start_pos = half_read - (size / 2)
-        kmer_end_pos = half_read + (size / 2)
-        kmer = sing_read[kmer_start_pos:kmer_end_pos]
+        # half_read = seq_len / 2
+        # kmer_start_pos = half_read - (size / 2)
+        # kmer_end_pos = half_read + (size / 2)
+        kmer = sing_read[:int(size)]
         kmer_list.append(kmer)
     return(kmer_list)
+
+##############################################################
+# code for getting kmer from the middle of read
+    # kmer_list = []
+    # for sing_read, size in zip(read, k_size):
+    #     seq_len = len(sing_read)
+    #     half_read = seq_len / 2
+    #     kmer_start_pos = half_read - (size / 2)
+    #     kmer_end_pos = half_read + (size / 2)
+    #     kmer = sing_read[kmer_start_pos:kmer_end_pos]
+    #     kmer_list.append(kmer)
+    # return(kmer_list)
 
 # convert kmers into hash forms
 def kmer_convert_to_bit(full_kmer_list):
@@ -195,17 +209,27 @@ def read_kmer_matcher(kmer_list_of_dicts, read_list, byte_genome):
         read_count = 0
         kmer_id = kmer_dict['read_number']
         for read_seq in read_list:
+            read_len = len(read_seq)
             read_count+=1
             kmer_loc = ''
             if kmer_id == read_count:
                 kmer_loc = kmer_dict['best_match_loc']
 
             genome_letter_position = 0
+            read_len_counter = 0
+            mapping_comparison_segment = []
+            # mapping_comparison_segment.append(read_seq)
+            genome_segment = []
             for letter in byte_genome:
                 genome_letter_position+=1
-                if genome_letter_position == kmer_loc:
-                    print(genome_letter_position)
-                    print(kmer_loc)
+                if genome_letter_position >= kmer_loc:
+                    read_len_counter+=1
+                    if read_len_counter <= read_len:
+                        genome_segment.append(letter)
+            mapping_comparison_segment.append(read_seq)
+            mapping_comparison_segment.append(genome_segment)
+            print(mapping_comparison_segment)
+
 
 
 def main():
@@ -242,13 +266,13 @@ def main():
 
 #PRODUCES LIST OF LENGTHS OF VARIOUS KMERS IN ORDER FROM FASTQ FILE
     kmer_sizes1 = kmer_len_gen(read_list)
-    # print(kmer_sizes)
+    # print(kmer_sizes1)
     max_kmer_size1 = max(kmer_sizes1)
-    # print(max_kmer_size)
+    # print(max_kmer_size1)
 
     # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
     kmer_seqs1 = kmer_hash_gen(read_list , kmer_sizes1)
-    # print(kmer_seqs)
+    #print(kmer_seqs1)
     # counters = 0
     # for i in kmer_seqs:
     #     print(i)
@@ -280,7 +304,7 @@ def main():
     # print(read_convert)
 
     #
-    kmer_and_read_matcher = read_kmer_matcher(kmer_search1, read_list, gen_hasher1)
+    kmer_and_read_matcher = read_kmer_matcher(kmer_search1, read_convert, gen_hasher1)
     print(kmer_and_read_matcher)
 
 if __name__ == '__main__':
