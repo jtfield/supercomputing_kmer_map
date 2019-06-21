@@ -128,6 +128,7 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
             mismatch_threshold = round(four_percent_of_kmer)
         read_kmer_stats['mismatch_threshold'] = mismatch_threshold
         read_kmer_stats['kmer_length'] = kmer_len
+        # read_kmer_stats['read_kmer_seq'] = read_kmer
 
         # THIS IS UNNECESSARY TO THE CODE. IT JUST HALTS MAPPING AFTER ONE READ KMER
         # FOR TESTING PURPOSES ONLY
@@ -176,7 +177,7 @@ def kmer_matcher(read_kmer_list, genome_kmer_list):
                 best_match_position = best_match_position
 
 
-            read_kmer_stats['genome_kmer_mapping_stats'] = genome_kmer_position_tracker
+            #read_kmer_stats['genome_kmer_mapping_stats'] = genome_kmer_position_tracker
         # best_match_loc[best_match_position] = best_match_counter
         # best_match_loc['best_match_loc'] = best_match_position
         # best_match_score['best_match_score'] = best_match_counter
@@ -211,24 +212,27 @@ def read_kmer_matcher(kmer_list_of_dicts, read_list, byte_genome):
         for read_seq in read_list:
             read_len = len(read_seq)
             read_count+=1
-            kmer_loc = ''
+            kmer_loc = 0
             if kmer_id == read_count:
                 kmer_loc = kmer_dict['best_match_loc']
 
             genome_letter_position = 0
             read_len_counter = 0
             mapping_comparison_segment = []
+            genome_segment = byte_genome[int(kmer_loc):int(read_len)]
             # mapping_comparison_segment.append(read_seq)
-            genome_segment = []
-            for letter in byte_genome:
-                genome_letter_position+=1
-                if genome_letter_position >= kmer_loc:
-                    read_len_counter+=1
-                    if read_len_counter <= read_len:
-                        genome_segment.append(letter)
+            # genome_segment = []
+            # for letter in byte_genome:
+            #     genome_letter_position+=1
+            #     if genome_letter_position >= kmer_loc:
+            #         read_len_counter+=1
+            #         if read_len_counter <= read_len:
+                        # genome_segment.append(letter)
+            print(genome_segment)
+            print(read_seq)
             mapping_comparison_segment.append(read_seq)
             mapping_comparison_segment.append(genome_segment)
-            print(mapping_comparison_segment)
+            #print(mapping_comparison_segment)
 
 
 
@@ -272,12 +276,15 @@ def main():
 
     # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
     kmer_seqs1 = kmer_hash_gen(read_list , kmer_sizes1)
-    #print(kmer_seqs1)
+    # print(kmer_seqs1)
     # counters = 0
-    # for i in kmer_seqs:
-    #     print(i)
-    #     counters+=1
-    # print(counters)
+
+    # for line in read_list:
+    #     print(line)
+    #
+    # with open(args.genome_file) as sequence:
+    #     for line in sequence:
+    #         print(line.upper())
 
     # CONVERTS KMERS INTO HASH VALUES (A = 00, C = 01, G = 10, T = 11)
     kmer_convert1 = kmer_convert_to_bit(kmer_seqs1)
@@ -288,16 +295,21 @@ def main():
 
     # CONVERT GENOME OR MSA TO HASH
     gen_hasher1 = gen_convert_to_bit(args.genome_file)
-    # print(gen_hasher)
+    # print(gen_hasher1)
 
     # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
     hash_gen_chunker1 = split_genome(gen_hasher1, max_kmer_size1)
-    # print(hash_gen_chunker)
+    # hash_gen_counter = 0
+    # for i in hash_gen_chunker1:
+    #     hash_gen_counter+=1
+    #     print("genome kmer")
+    #     print(hash_gen_counter)
+    #     print(i)
 
     # MAP ALL READ KMERS TO ALL GENOME KMERS AND CONSTRUCT DICT
     # DICT CONTAINS INFO ON BEST MAP LOCATION WITHIN THE GENOME KMERS
     kmer_search1 = kmer_matcher(kmer_convert1, hash_gen_chunker1)
-    #print(kmer_search1)
+    # print(kmer_search1)
 
     # CONVERT READS TO BYTES
     read_convert = kmer_convert_to_bit(read_list)
@@ -305,7 +317,7 @@ def main():
 
     #
     kmer_and_read_matcher = read_kmer_matcher(kmer_search1, read_convert, gen_hasher1)
-    print(kmer_and_read_matcher)
+    #print(kmer_and_read_matcher)
 
 if __name__ == '__main__':
     main()
