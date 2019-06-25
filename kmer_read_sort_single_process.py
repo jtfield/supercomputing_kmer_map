@@ -68,10 +68,26 @@ def split_genome(genome_hash_list, max_kmer_len):
 
 # loop through both hash tables and identify shared sequences
 def hash_table_kmer_matcher(genome_kmer_hash_table, read_hash_table):
+
+    kmer_match_locations = {}
     for read_seq, read_pos in read_hash_table.items():
         if read_seq in genome_kmer_hash_table:
-            print(read_seq)
-            print(genome_kmer_hash_table[read_seq])
+            gen_pos = genome_kmer_hash_table[read_seq]
+            kmer_match_locations[read_pos] = gen_pos
+    return kmer_match_locations
+
+
+# get the length of the reads, read in the reads to a new hash table
+# def full_read_hash_table(read_list):
+#     read_table = {}
+#     read_count = 0
+#     for sing_read in read_list:
+#         read_count+=1
+#         sing_read = sing_read.upper()
+#         read_hash = hash(sing_read)
+#         read_table[read_hash] = read_count
+#     return(read_table)
+
 
 
 # # begin mapping the read kmers to the genome kmers
@@ -284,9 +300,22 @@ def main():
     genome_kmer_hash_table = split_genome(genome, size)
     #print(genome_kmer_hash_table)
 
-#
+#MATCH READ KMERS TO GENOME KMERS AND COLLECT LOCATION INFO IN NEW TABLE
     kmer_matching = hash_table_kmer_matcher(genome_kmer_hash_table, read_kmer_hash_table)
     print(kmer_matching)
+
+
+    del read_kmer_hash_table
+    del genome_kmer_hash_table
+
+#ADD FULL READS TO A HASH TABLE AFTER HASHING
+    #read_hashing = full_read_hash_table(read_list)
+    # print(read_hashing)
+
+#ADD READ SIZED GENOME WINDOW CHUNKS TO HASH TABLE
+    # genome_hashing =
+
+
     # # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
     # kmer_seqs1 = kmer_hash_gen(read_list , kmer_sizes1)
     # # print(kmer_seqs1)
