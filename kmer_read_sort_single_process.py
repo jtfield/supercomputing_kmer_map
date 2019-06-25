@@ -6,105 +6,43 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    #parser.add_argument('--read_file_1')
+    parser.add_argument('--read_file_1')
     parser.add_argument('--genome_file')
     parser.add_argument('--kmer_size')
     # parser.add_argument('--read_file_2')
     return parser.parse_args()
 
 
-# get length of reads and find appropriate kmer lengths
-# def kmer_len_gen(s):
-#     kmer_lengths = []
-#     for single_read in s:
-#         seq_length = len(single_read)
-#         kmer_len = seq_length / 10
-#         kmer_lengths.append(kmer_len)
-#     return kmer_lengths
-
 # get kmer sequences in list form
-def kmer_hash_gen(read, k_size):
+def kmer_hash_gen(reads, kmer_size):
 #################################################################
 # code for getting kmer from the beginning of read
-    size = args.kmer_size
+    #size = args.kmer_size
     kmer_table = {}
     read_count = 0
-    for sing_read in read:
+    for sing_read in reads:
         read_count+=1
         # seq_len = len(sing_read)
         # half_read = seq_len / 2
         # kmer_start_pos = half_read - (size / 2)
         # kmer_end_pos = half_read + (size / 2)
         sing_read = sing_read.upper()
-        kmer = read_hash[:int(size)]
-        kmer_hash = hash(sing_read)
+        kmer = sing_read[:int(kmer_size)]
+        kmer_hash = hash(kmer)
         kmer_table[kmer_hash] = read_count
-    return(kmer_list)
+    return(kmer_table)
 
-##############################################################
-# code for getting kmer from the middle of read
-    # kmer_list = []
-    # for sing_read, size in zip(read, k_size):
-    #     seq_len = len(sing_read)
-    #     half_read = seq_len / 2
-    #     kmer_start_pos = half_read - (size / 2)
-    #     kmer_end_pos = half_read + (size / 2)
-    #     kmer = sing_read[kmer_start_pos:kmer_end_pos]
-    #     kmer_list.append(kmer)
-    # return(kmer_list)
+# read in genome and strip out newlines to put all sequences on the same line
+def genome_reader(genome_file):
+    gen_seq = ""
+    with open(genome_file) as seq:
+        for line in seq:
+            #line = line.strip()
+            line = line.strip('\n')
+            #line = line.strip(' ')
+            gen_seq = gen_seq + line
+    return gen_seq
 
-# convert kmers into hash forms
-# def kmer_convert_to_bit(full_kmer_list):
-#     # A = 00
-#     # C = 01
-#     # G = 10
-#     # T = 11
-#     hash_kmers = []
-#     for seq in full_kmer_list:
-#         #print("converting kmers to hash")
-#         kmer_seq = []
-#         for letter in seq:
-#             if letter == 'A':
-#                 kmer_seq.append('00')
-#             elif letter == 'C':
-#                 kmer_seq.append('01')
-#             elif letter == 'G':
-#                 kmer_seq.append('10')
-#             elif letter == 'T':
-#                 kmer_seq.append('11')
-#         hash_kmers.append(kmer_seq)
-#     return hash_kmers
-
-# convert genome or msa into hash form
-# def gen_convert_to_bit(genome_file):
-#     hash_gen = []
-#     full_genome = genome_file
-#     with open(full_genome) as sequence:
-#         for line in sequence:
-#             line = line.upper()
-#             if ">" not in line:
-#                 for letter in line:
-#                     if letter == 'A':
-#                         hash_gen.append('00')
-#                     elif letter == 'C':
-#                         hash_gen.append('01')
-#                     elif letter == 'G':
-#                         hash_gen.append('10')
-#                     elif letter == 'T':
-#                         hash_gen.append('11')
-#     return hash_gen
-
-# use the max kmer size to chunk up the genome into kmer sized chunks
-# these chunks should move up the genome 1 nucleotide hash at a time
-# def split_genome(genome_hash_list, max_kmer_len):
-#     genome_hash_chunk_array = []
-#     nuc_pos = 0
-#     while max_kmer_len != len(genome_hash_list):
-#         window = genome_hash_list[nuc_pos:max_kmer_len]
-#         genome_hash_chunk_array.append(window)
-#         nuc_pos+=1
-#         max_kmer_len+=1
-#     return genome_hash_chunk_array
 
 
 # hash genome and add it to a hash table with kmers corresponding to the positions of the first nucleotide
@@ -113,7 +51,7 @@ def split_genome(genome_hash_list, max_kmer_len):
     genome_hash_chunk_array = {}
     nuc_pos = 0
     while nuc_pos < len(genome_hash_list):
-        window = genome_hash_list[nuc_pos:max_kmer_len+nuc_pos]
+        window = genome_hash_list[int(nuc_pos):int(max_kmer_len)+int(nuc_pos)]
         #window = line[nuc_pos:max_kmer_len]
         window = window.upper()
         window_hash = hash(window)
@@ -126,6 +64,15 @@ def split_genome(genome_hash_list, max_kmer_len):
         elif window_hash in genome_hash_chunk_array:
             genome_hash_chunk_array[window_hash].append(nuc_pos)
     return genome_hash_chunk_array
+
+
+# loop through both hash tables and identify shared sequences
+def hash_table_kmer_matcher(genome_kmer_hash_table, read_hash_table):
+    for read_seq, read_pos in read_hash_table.items():
+        if read_seq in genome_kmer_hash_table:
+            print(read_seq)
+            print(genome_kmer_hash_table[read_seq])
+
 
 # # begin mapping the read kmers to the genome kmers
 # def kmer_matcher(read_kmer_list, genome_kmer_list):
@@ -294,6 +241,7 @@ def split_genome(genome_hash_list, max_kmer_len):
 def main():
     args = parse_args()
 
+    size = args.kmer_size
     # GET READ LEN TO EXTRAPOLATE KMER LENGTH
     line_count = 0
     header = ''
@@ -323,56 +271,66 @@ def main():
                     line_count = 0
 
 
-#PRODUCES LIST OF LENGTHS OF VARIOUS KMERS IN ORDER FROM FASTQ FILE
-    kmer_sizes1 = kmer_len_gen(read_list)
-    # print(kmer_sizes1)
-    max_kmer_size1 = max(kmer_sizes1)
-    # print(max_kmer_size1)
+#PRODUCES HASH TABLE OF KMERS FROM THE NEW READ FILE
+    read_kmer_hash_table = kmer_hash_gen(read_list, size)
+    #print(read_kmer_hash_table)
 
-    # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
-    kmer_seqs1 = kmer_hash_gen(read_list , kmer_sizes1)
-    # print(kmer_seqs1)
-    # counters = 0
+#STRIPS NEW LINES FROM GENOME FILE
+    genome = genome_reader(args.genome_file)
+    # print(genome)
 
-    # for line in read_list:
-    #     print(line)
+
+#PRODUCES HASH TABLE OF KMERS FROM THE GENOME OR LOCI
+    genome_kmer_hash_table = split_genome(genome, size)
+    #print(genome_kmer_hash_table)
+
+#
+    kmer_matching = hash_table_kmer_matcher(genome_kmer_hash_table, read_kmer_hash_table)
+    print(kmer_matching)
+    # # PRODUCES SEQUENCES FOR KMERS OF APPROPRIATE LENGTHS
+    # kmer_seqs1 = kmer_hash_gen(read_list , kmer_sizes1)
+    # # print(kmer_seqs1)
+    # # counters = 0
     #
-    # with open(args.genome_file) as sequence:
-    #     for line in sequence:
-    #         print(line.upper())
-
-    # CONVERTS KMERS INTO HASH VALUES (A = 00, C = 01, G = 10, T = 11)
-    kmer_convert1 = kmer_convert_to_bit(kmer_seqs1)
-    # counters = 0
-    # for i in kmer_convert:
-    #     counters+=1
-    # print(counters)
-
-    # CONVERT GENOME OR MSA TO HASH
-    gen_hasher1 = gen_convert_to_bit(args.genome_file)
-    # print(gen_hasher1)
-
-    # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
-    hash_gen_chunker1 = split_genome(gen_hasher1, max_kmer_size1)
-    # hash_gen_counter = 0
-    # for i in hash_gen_chunker1:
-    #     hash_gen_counter+=1
-    #     print("genome kmer")
-    #     print(hash_gen_counter)
-    #     print(i)
-
-    # MAP ALL READ KMERS TO ALL GENOME KMERS AND CONSTRUCT DICT
-    # DICT CONTAINS INFO ON BEST MAP LOCATION WITHIN THE GENOME KMERS
-    kmer_search1 = kmer_matcher(kmer_convert1, hash_gen_chunker1)
-    # print(kmer_search1)
-
-    # CONVERT READS TO BYTES
-    read_convert = kmer_convert_to_bit(read_list)
-    # print(read_convert)
-
+    # # for line in read_list:
+    # #     print(line)
+    # #
+    # # with open(args.genome_file) as sequence:
+    # #     for line in sequence:
+    # #         print(line.upper())
     #
-    kmer_and_read_matcher = read_kmer_matcher(kmer_search1, read_convert, gen_hasher1)
-    #print(kmer_and_read_matcher)
+    # # CONVERTS KMERS INTO HASH VALUES (A = 00, C = 01, G = 10, T = 11)
+    # kmer_convert1 = kmer_convert_to_bit(kmer_seqs1)
+    # # counters = 0
+    # # for i in kmer_convert:
+    # #     counters+=1
+    # # print(counters)
+    #
+    # # CONVERT GENOME OR MSA TO HASH
+    # gen_hasher1 = gen_convert_to_bit(args.genome_file)
+    # # print(gen_hasher1)
+    #
+    # # CONVERT HASH GENOME TO LIST OF KMERS FOR MAPPING
+    # hash_gen_chunker1 = split_genome(gen_hasher1, max_kmer_size1)
+    # # hash_gen_counter = 0
+    # # for i in hash_gen_chunker1:
+    # #     hash_gen_counter+=1
+    # #     print("genome kmer")
+    # #     print(hash_gen_counter)
+    # #     print(i)
+    #
+    # # MAP ALL READ KMERS TO ALL GENOME KMERS AND CONSTRUCT DICT
+    # # DICT CONTAINS INFO ON BEST MAP LOCATION WITHIN THE GENOME KMERS
+    # kmer_search1 = kmer_matcher(kmer_convert1, hash_gen_chunker1)
+    # # print(kmer_search1)
+    #
+    # # CONVERT READS TO BYTES
+    # read_convert = kmer_convert_to_bit(read_list)
+    # # print(read_convert)
+    #
+    # #
+    # kmer_and_read_matcher = read_kmer_matcher(kmer_search1, read_convert, gen_hasher1)
+    # #print(kmer_and_read_matcher)
 
 if __name__ == '__main__':
     main()
