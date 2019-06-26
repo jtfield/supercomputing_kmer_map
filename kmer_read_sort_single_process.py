@@ -312,7 +312,7 @@ def main():
     # print(reverse_genome_kmer_hash_table)
 
 #READ IN SECOND SET OF READS
-    read_read_file_2 = read_file_reader(args.read_file_1)
+    read_read_file_2 = read_file_reader(args.read_file_2)
     # print(read_read_file_2)
 
 #HASH READS FROM FILE TWO AND ADD THEM TO HASH TABLE
