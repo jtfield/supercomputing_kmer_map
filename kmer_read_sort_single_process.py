@@ -145,9 +145,14 @@ def hash_table_multi_kmer_matcher(genome_kmer_hash_table, read_hash_table):
     for read_number, kmer_dict in read_hash_table.items():
         kmer_match_locations = {}
         for read_seq, read_pos in kmer_dict.items():
-            if read_seq in genome_kmer_hash_table:
-                gen_pos = genome_kmer_hash_table[read_seq]
-                kmer_match_locations[read_pos] = gen_pos
+            if not read_pos in kmer_match_locations:
+                if read_seq in genome_kmer_hash_table:
+                    gen_pos = genome_kmer_hash_table[read_seq]
+                    kmer_match_locations[read_pos] = [gen_pos]
+            elif read_pos in kmer_match_locations:
+                if read_seq in genome_kmer_hash_table:
+                    gen_pos = genome_kmer_hash_table[read_seq]
+                    kmer_match_locations[read_pos].append(gen_pos)
         if len(kmer_match_locations) != 0:
 
             total_matchs_table[read_number] = kmer_match_locations
@@ -421,15 +426,23 @@ def main():
     # print(kmer_matching)
     #
     multi_kmer_match = hash_table_multi_kmer_matcher(genome_kmer_hash_table, full_read_kmer_hash_table)
-    print(multi_kmer_match)
+    #print(multi_kmer_match)
 
-    del read_kmer_hash_table
-    del genome_kmer_hash_table
 
+    itemlist = list(multi_kmer_match.items())
+    for item in itemlist:
+        for key, value in item[1].items():
+            for value_1 in value:
+                print(value_1)
 
 #PERFORM GENOME KMER SPLIT FOR REVERSE COMPLIMENT KMERS
-    reverse_genome_kmer_hash_table = split_genome_reverse(genome, size)
+    # reverse_genome_kmer_hash_table = split_genome_reverse(genome, size)
     # print(reverse_genome_kmer_hash_table)
+
+
+
+
+
 #ADD FULL READS TO A HASH TABLE AFTER HASHING
     #read_hashing = full_read_hash_table(read_list)
     # print(read_hashing)
