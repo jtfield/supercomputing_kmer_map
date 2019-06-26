@@ -20,6 +20,7 @@ def kmer_hash_gen(reads, kmer_size):
     #size = args.kmer_size
     kmer_table = {}
     read_count = 0
+    kmer_read_position = 0
     for sing_read in reads:
         read_count+=1
         # seq_len = len(sing_read)
@@ -31,6 +32,44 @@ def kmer_hash_gen(reads, kmer_size):
         kmer_hash = hash(kmer)
         kmer_table[kmer_hash] = read_count
     return(kmer_table)
+
+
+# chunks each complete read into kmers, hashes them and adds them to a hash table
+# def full_read_kmer_hash_gen(reads, kmer_size):
+#     kmer_table = {}
+#     read_count = 0
+#     for sing_read in reads:
+#         read_count+=1
+#         # """Yield successive n-sized chunks from l."""
+#         parts = [sing_read[i:i+int(kmer_size)] for i in range(0, len(sing_read), int(kmer_size))]
+#         kmer_position = 0
+#         read_kmer_chunks_table = {}
+#         for kmer in parts:
+#             kmer = kmer.strip('\n')
+#             kmer = hash(kmer)
+#             kmer_position+=1
+#             read_kmer_chunks_table[kmer_position] = kmer
+#         kmer_table[read_count] = read_kmer_chunks_table
+#     return kmer_table
+
+def full_read_kmer_hash_gen(reads, kmer_size):
+    kmer_table = {}
+    read_count = 0
+    for sing_read in reads:
+        read_count+=1
+        # """Yield successive n-sized chunks from l."""
+        parts = [sing_read[i:i+int(kmer_size)] for i in range(0, len(sing_read), int(kmer_size))]
+        kmer_position = 0
+        read_kmer_chunks_table = {}
+        for kmer in parts:
+            kmer = kmer.strip('\n')
+            kmer = hash(kmer)
+            kmer_position+=1
+            read_kmer_chunks_table[kmer] = kmer_position
+        kmer_table[read_count] = read_kmer_chunks_table
+    return kmer_table
+
+
 
 # read in genome and strip out newlines to put all sequences on the same line
 def genome_reader(genome_file):
@@ -66,7 +105,29 @@ def split_genome(genome_hash_list, max_kmer_len):
     return genome_hash_chunk_array
 
 
+
+# verbose genome hash table gen
+def verbose_split_genome(genome_hash_list, max_kmer_len):
+    genome_hash_chunk_array = {}
+    nuc_pos = 0
+    while nuc_pos < len(genome_hash_list):
+        window = genome_hash_list[int(nuc_pos):int(max_kmer_len)+int(nuc_pos)]
+        #window = line[nuc_pos:max_kmer_len]
+        window = window.upper()
+        window_hash = hash(window)
+        nuc_pos+=1
+        #
+        if not window_hash in genome_hash_chunk_array:
+            # add kmer to the hash table and add
+            genome_hash_chunk_array[window_hash] = [window]
+
+        elif window_hash in genome_hash_chunk_array:
+            genome_hash_chunk_array[window_hash].append(window)
+    return genome_hash_chunk_array
+
+
 # loop through both hash tables and identify shared sequences
+# uses single kmers per read table
 def hash_table_kmer_matcher(genome_kmer_hash_table, read_hash_table):
 
     kmer_match_locations = {}
@@ -76,6 +137,43 @@ def hash_table_kmer_matcher(genome_kmer_hash_table, read_hash_table):
             kmer_match_locations[read_pos] = gen_pos
     return kmer_match_locations
 
+
+# loop through both hash tables and identify shared sequences
+# uses multiple kmers per read
+def hash_table_multi_kmer_matcher(genome_kmer_hash_table, read_hash_table):
+    total_matchs_table = {}
+    for read_number, kmer_dict in read_hash_table.items():
+        kmer_match_locations = {}
+        for read_seq, read_pos in kmer_dict.items():
+            if read_seq in genome_kmer_hash_table:
+                gen_pos = genome_kmer_hash_table[read_seq]
+                kmer_match_locations[read_pos] = gen_pos
+        if len(kmer_match_locations) != 0:
+
+            total_matchs_table[read_number] = kmer_match_locations
+
+    return total_matchs_table
+
+
+# splits genome into kmers in reverse order and adds them to the hash table
+def split_genome_reverse(genome_hash_list, max_kmer_len):
+    reverse_genome_hash_chunk_array = {}
+    nuc_pos = 0
+    while nuc_pos < len(genome_hash_list):
+        #window = genome_hash_list[int(nuc_pos):int(max_kmer_len)+int(nuc_pos)]
+        window = genome_hash_list[(len(genome_hash_list) - int(max_kmer_len)) - int(nuc_pos):len(genome_hash_list) - int(nuc_pos)]
+        #window = line[nuc_pos:max_kmer_len]
+        window = window.upper()
+        window_hash = hash(window)
+        nuc_pos+=1
+        #
+        if not window_hash in reverse_genome_hash_chunk_array:
+            # add kmer to the hash table and add
+            reverse_genome_hash_chunk_array[window_hash] = [nuc_pos]
+
+        elif window_hash in reverse_genome_hash_chunk_array:
+            reverse_genome_hash_chunk_array[window_hash].append(nuc_pos)
+    return reverse_genome_hash_chunk_array
 
 # get the length of the reads, read in the reads to a new hash table
 # def full_read_hash_table(read_list):
@@ -289,7 +387,14 @@ def main():
 
 #PRODUCES HASH TABLE OF KMERS FROM THE NEW READ FILE
     read_kmer_hash_table = kmer_hash_gen(read_list, size)
-    #print(read_kmer_hash_table)
+    # print(read_kmer_hash_table)
+
+    full_read_kmer_hash_table = full_read_kmer_hash_gen(read_list, size)
+    # print(full_read_kmer_hash_table)
+    # itemlist = list(full_read_kmer_hash_table.items())
+    # for item in itemlist:
+    #     print(item)
+
 
 #STRIPS NEW LINES FROM GENOME FILE
     genome = genome_reader(args.genome_file)
@@ -298,16 +403,33 @@ def main():
 
 #PRODUCES HASH TABLE OF KMERS FROM THE GENOME OR LOCI
     genome_kmer_hash_table = split_genome(genome, size)
-    #print(genome_kmer_hash_table)
+    # print(genome_kmer_hash_table)
+
+
+
+
+    # genome_kmer_hash_table = verbose_split_genome(genome, size)
+    # itemlist = list(genome_kmer_hash_table.items())
+    # itemlist = sorted(itemlist, key=lambda x: -len(x[1]))
+    #     #print(list(map(lambda x: (x[0], x[1][0], len(x[1])), itemlist)))
+    # lenlist = list(map(lambda x: (x[0], len(x[1])), itemlist))
+    # print("\n".join(list(map(str, lenlist))))
+
 
 #MATCH READ KMERS TO GENOME KMERS AND COLLECT LOCATION INFO IN NEW TABLE
-    kmer_matching = hash_table_kmer_matcher(genome_kmer_hash_table, read_kmer_hash_table)
-    print(kmer_matching)
-
+    # kmer_matching = hash_table_kmer_matcher(genome_kmer_hash_table, read_kmer_hash_table)
+    # print(kmer_matching)
+    #
+    multi_kmer_match = hash_table_multi_kmer_matcher(genome_kmer_hash_table, full_read_kmer_hash_table)
+    print(multi_kmer_match)
 
     del read_kmer_hash_table
     del genome_kmer_hash_table
 
+
+#PERFORM GENOME KMER SPLIT FOR REVERSE COMPLIMENT KMERS
+    reverse_genome_kmer_hash_table = split_genome_reverse(genome, size)
+    # print(reverse_genome_kmer_hash_table)
 #ADD FULL READS TO A HASH TABLE AFTER HASHING
     #read_hashing = full_read_hash_table(read_list)
     # print(read_hashing)
