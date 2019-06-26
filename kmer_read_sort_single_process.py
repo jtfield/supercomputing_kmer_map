@@ -9,8 +9,39 @@ def parse_args():
     parser.add_argument('--read_file_1')
     parser.add_argument('--genome_file')
     parser.add_argument('--kmer_size')
-    # parser.add_argument('--read_file_2')
+    parser.add_argument('--read_file_2')
     return parser.parse_args()
+
+def read_file_reader(read_file):
+    # size = args.kmer_size
+    # GET READ LEN TO EXTRAPOLATE KMER LENGTH
+    line_count = 0
+    header = ''
+    seq = ''
+    seperate = ''
+    qual = ''
+    read_list = []
+    qual_list = []
+    with open(read_file) as read1:
+        for line in read1:
+            # read in read file and count the number of reads in the entire file
+            # this information will be used for the location of the read within the file
+            #
+            if len(line) > 0:
+                line_count+=1
+
+                if line_count == 1:
+                    header = line
+                elif line_count == 2:
+                    seq = line
+                    read_list.append(seq)
+                elif line_count == 3:
+                    seperate = line
+                elif line_count == 4:
+                    qual = line
+                    # qual_list.append(qual)
+                    line_count = 0
+    return read_list
 
 
 # get kmer sequences in list form
@@ -76,6 +107,8 @@ def genome_reader(genome_file):
     gen_seq = ""
     with open(genome_file) as seq:
         for line in seq:
+            if '>' in line:
+                continue
             #line = line.strip()
             line = line.strip('\n')
             #line = line.strip(' ')
@@ -160,6 +193,10 @@ def hash_table_multi_kmer_matcher(genome_kmer_hash_table, read_hash_table):
     return total_matchs_table
 
 
+# reverse complement genome
+# def reverse_complement_genome(genome_seq):
+
+
 # splits genome into kmers in reverse order and adds them to the hash table
 def split_genome_reverse(genome_hash_list, max_kmer_len):
     reverse_genome_hash_chunk_array = {}
@@ -170,6 +207,7 @@ def split_genome_reverse(genome_hash_list, max_kmer_len):
         #window = line[nuc_pos:max_kmer_len]
         window = window.upper()
         window_hash = hash(window)
+        # window_hash = window
         nuc_pos+=1
         #
         if not window_hash in reverse_genome_hash_chunk_array:
@@ -178,6 +216,7 @@ def split_genome_reverse(genome_hash_list, max_kmer_len):
 
         elif window_hash in reverse_genome_hash_chunk_array:
             reverse_genome_hash_chunk_array[window_hash].append(nuc_pos)
+    reverse_genome_hash_chunk_array.pop('', None)
     return reverse_genome_hash_chunk_array
 
 
@@ -189,46 +228,50 @@ def main():
     args = parse_args()
 
     size = args.kmer_size
-    # GET READ LEN TO EXTRAPOLATE KMER LENGTH
-    line_count = 0
-    header = ''
-    seq = ''
-    seperate = ''
-    qual = ''
-    read_list = []
-    qual_list = []
-    with open(args.read_file_1) as read1:
-        for line in read1:
-            # read in read file and count the number of reads in the entire file
-            # this information will be used for the location of the read within the file
-            #
-            if len(line) > 0:
-                line_count+=1
-
-                if line_count == 1:
-                    header = line
-                elif line_count == 2:
-                    seq = line
-                    read_list.append(seq)
-                elif line_count == 3:
-                    seperate = line
-                elif line_count == 4:
-                    qual = line
-                    # qual_list.append(qual)
-                    line_count = 0
+    # # GET READ LEN TO EXTRAPOLATE KMER LENGTH
+    # line_count = 0
+    # header = ''
+    # seq = ''
+    # seperate = ''
+    # qual = ''
+    # read_list = []
+    # qual_list = []
+    # with open(args.read_file_1) as read1:
+    #     for line in read1:
+    #         # read in read file and count the number of reads in the entire file
+    #         # this information will be used for the location of the read within the file
+    #         #
+    #         if len(line) > 0:
+    #             line_count+=1
+    #
+    #             if line_count == 1:
+    #                 header = line
+    #             elif line_count == 2:
+    #                 seq = line
+    #                 read_list.append(seq)
+    #             elif line_count == 3:
+    #                 seperate = line
+    #             elif line_count == 4:
+    #                 qual = line
+    #                 # qual_list.append(qual)
+    #                 line_count = 0
+    #     return read_list
 
 
 #PRODUCES HASH TABLE OF KMERS FROM THE NEW READ FILE
     # read_kmer_hash_table = kmer_hash_gen(read_list, size)
     # print(read_kmer_hash_table)
 
-    full_read_kmer_hash_table = full_read_kmer_hash_gen(read_list, size)
+    read_read_file = read_file_reader(args.read_file_1)
+    # print(read_read_file)
+
+    full_read_kmer_hash_table = full_read_kmer_hash_gen(read_read_file, size)
     # print(full_read_kmer_hash_table)
     # itemlist = list(full_read_kmer_hash_table.items())
     # for item in itemlist:
     #     print(item)
 
-    del read_list
+
 
 #STRIPS NEW LINES FROM GENOME FILE
     genome = genome_reader(args.genome_file)
@@ -255,7 +298,7 @@ def main():
     # print(kmer_matching)
     #
     multi_kmer_match = hash_table_multi_kmer_matcher(genome_kmer_hash_table, full_read_kmer_hash_table)
-    print(multi_kmer_match)
+    # print(multi_kmer_match)
 
 
     # itemlist = list(multi_kmer_match.items())
@@ -265,9 +308,20 @@ def main():
     #             print(value_1)
 
 #PERFORM GENOME KMER SPLIT FOR REVERSE COMPLIMENT KMERS
-    # reverse_genome_kmer_hash_table = split_genome_reverse(genome, size)
+    reverse_genome_kmer_hash_table = split_genome_reverse(genome, size)
     # print(reverse_genome_kmer_hash_table)
 
+#READ IN SECOND SET OF READS
+    read_read_file_2 = read_file_reader(args.read_file_1)
+    # print(read_read_file_2)
+
+#HASH READS FROM FILE TWO AND ADD THEM TO HASH TABLE
+    second_full_read_kmer_hash_table = full_read_kmer_hash_gen(read_read_file_2, size)
+    # print(second_full_read_kmer_hash_table)
+
+#RUN HASH MATCH ON KMERS FROM SECOND SET OF READS AGAINST REVERSE KMER HASHED GENOME
+    second_multi_kmer_match = hash_table_multi_kmer_matcher(reverse_genome_kmer_hash_table, second_full_read_kmer_hash_table)
+    print(second_multi_kmer_match)
 
 
 if __name__ == '__main__':
