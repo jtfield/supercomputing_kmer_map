@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import statistics
 
 
 def parse_args():
@@ -10,6 +11,7 @@ def parse_args():
     parser.add_argument('--genome_file')
     parser.add_argument('--kmer_size')
     parser.add_argument('--read_file_2')
+    parser.add_argument('--read_size')
     return parser.parse_args()
 
 def read_file_reader(read_file):
@@ -220,7 +222,30 @@ def split_genome_reverse(genome_hash_list, max_kmer_len):
     return reverse_genome_hash_chunk_array
 
 
-
+# get location information from the output of kmer matching and use this to map full reads to the location in the genome
+def full_read_location_grabber(kmer_match_hash_table, read_len):
+    for read_num, dict in kmer_match_hash_table.items():
+        if len(dict) >= 3:
+            locs = []
+            for kmer_num, match_loc in dict.items():
+                locs.append(float(match_loc[0][0]))
+            kmer_range = max(locs) - min(locs)
+            print(kmer_range)
+            # kmer_range = int(kmer_range)
+            read_len = int(read_len)
+            if kmer_range <= read_len:
+                print('read_found')
+            elif kmer_range > read_len:
+                print('extra_mapping_locations')
+                sd = statistics.stdev(locs)
+                while sd > read_len and len(locs) > 3:
+                    locs.remove(max(locs))
+                    locs.remove(min(locs))
+                    print(locs)
+                    sd = statistics.stdev(locs)
+                    print("trimming locs")
+                    # print(locs)
+                    # print(sd)
 
 
 
@@ -228,34 +253,6 @@ def main():
     args = parse_args()
 
     size = args.kmer_size
-    # # GET READ LEN TO EXTRAPOLATE KMER LENGTH
-    # line_count = 0
-    # header = ''
-    # seq = ''
-    # seperate = ''
-    # qual = ''
-    # read_list = []
-    # qual_list = []
-    # with open(args.read_file_1) as read1:
-    #     for line in read1:
-    #         # read in read file and count the number of reads in the entire file
-    #         # this information will be used for the location of the read within the file
-    #         #
-    #         if len(line) > 0:
-    #             line_count+=1
-    #
-    #             if line_count == 1:
-    #                 header = line
-    #             elif line_count == 2:
-    #                 seq = line
-    #                 read_list.append(seq)
-    #             elif line_count == 3:
-    #                 seperate = line
-    #             elif line_count == 4:
-    #                 qual = line
-    #                 # qual_list.append(qual)
-    #                 line_count = 0
-    #     return read_list
 
 
 #PRODUCES HASH TABLE OF KMERS FROM THE NEW READ FILE
@@ -298,7 +295,7 @@ def main():
     # print(kmer_matching)
     #
     multi_kmer_match = hash_table_multi_kmer_matcher(genome_kmer_hash_table, full_read_kmer_hash_table)
-    # print(multi_kmer_match)
+    #print(multi_kmer_match)
 
 
     # itemlist = list(multi_kmer_match.items())
@@ -321,7 +318,13 @@ def main():
 
 #RUN HASH MATCH ON KMERS FROM SECOND SET OF READS AGAINST REVERSE KMER HASHED GENOME
     second_multi_kmer_match = hash_table_multi_kmer_matcher(reverse_genome_kmer_hash_table, second_full_read_kmer_hash_table)
-    print(second_multi_kmer_match)
+    # print(second_multi_kmer_match)
+
+
+#GRAB MAPPING LOCATIONS AND CHECK IF MULTIPLE KMERS FROM A SINGLE READ FALL INTO THE SAME AREA OF THE GENOME
+    match_loc = full_read_location_grabber(multi_kmer_match, args.read_size)
+    print(match_loc)
+
 
 
 if __name__ == '__main__':
