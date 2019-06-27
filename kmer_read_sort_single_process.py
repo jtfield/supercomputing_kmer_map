@@ -264,25 +264,15 @@ def full_read_location_grabber(kmer_match_hash_table, read_len, kmer_len):
                     read_start = locs_dict[first_kmer][0] - missing_nucs
                     read_map_locations[read_num] = read_start
 
-                # for key, value in locs_dict.items():
-                #     if key == 1:
-                #         first_kmer_genome_match = locs_dict[key][0]
-                #         read_map_locations[read_num] = first_kmer_genome_match
-                #     elif
-                # first_kmer = min(locs_dict.keys())
-                # first_kmer_genome_match = locs_dict[first_kmer][0]
-                # read_map_locations[read_num] = first_kmer_genome_match
-
 
             elif kmer_range > read_len:
-
-
 
                 while kmer_range > read_len and len(locs_list) >= 3:
                     locs_list.remove(max(locs_list))
                     locs_list.remove(min(locs_list))
                     # print(locs_list)
                     kmer_range = max(locs_list) - min(locs_list)
+
             if min(locs_dict.keys()) == 1:
                 first_kmer = min(locs_dict.keys())
                 first_kmer_genome_match = locs_dict[first_kmer][0]
@@ -297,6 +287,23 @@ def full_read_location_grabber(kmer_match_hash_table, read_len, kmer_len):
             # read_map_locations[read_num] = first_kmer_genome_match
 
     return read_map_locations
+
+def forward_map_reads(read_locations_table, read_list, genome_file, read_length):
+    for read_num, read_loc in read_locations_table.items():
+        read_counter = 0
+
+        for read in read_list:
+
+            read_counter+=1
+            if read_num == read_counter:
+                genome_seq = genome_file[int(read_loc) - 1 :(int(read_loc) + int(read_length)) - 1]
+                genome_seq = genome_seq.upper()
+                print(read)
+                print(genome_seq)
+                print('new_seqs')
+                # for nuc1 in read:
+                #     for nuc2 in genome_seq:
+                #         if nuc1 == nuc2:
 
 
 
@@ -377,9 +384,12 @@ def main():
 
 #GRAB MAPPING LOCATIONS AND CHECK IF MULTIPLE KMERS FROM A SINGLE READ FALL INTO THE SAME AREA OF THE GENOME
     match_loc = full_read_location_grabber(multi_kmer_match, args.read_size, size)
-    print(match_loc)
+    # print(match_loc)
 
 
+#TESTING READ MAPPING TO THE GENOME
+    read_mapping = forward_map_reads(match_loc, read_read_file, genome, args.read_size)
+    print(read_mapping)
 
 if __name__ == '__main__':
     main()
