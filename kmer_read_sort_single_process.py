@@ -183,11 +183,15 @@ def hash_table_multi_kmer_matcher(genome_kmer_hash_table, read_hash_table):
             if not read_pos in kmer_match_locations:
                 if read_seq in genome_kmer_hash_table:
                     gen_pos = genome_kmer_hash_table[read_seq]
+
                     kmer_match_locations[read_pos] = [gen_pos]
+                    # kmer_match_locations[read_pos] = []
+                    # kmer_match_locations.setdefault(read_pos, []).append(gen_pos)
             elif read_pos in kmer_match_locations:
                 if read_seq in genome_kmer_hash_table:
                     gen_pos = genome_kmer_hash_table[read_seq]
                     kmer_match_locations[read_pos].append(gen_pos)
+                    # kmer_match_locations.setdefault(read_pos, []).append(gen_pos)
         if len(kmer_match_locations) != 0:
 
             total_matchs_table[read_number] = kmer_match_locations
@@ -224,28 +228,61 @@ def split_genome_reverse(genome_hash_list, max_kmer_len):
 
 # get location information from the output of kmer matching and use this to map full reads to the location in the genome
 def full_read_location_grabber(kmer_match_hash_table, read_len):
+    read_map_locations = {}
     for read_num, dict in kmer_match_hash_table.items():
         if len(dict) >= 3:
-            locs = []
+            read_map_locations[read_num] = []
+            locs_dict = {}
+            locs_list = []
+
+            # this is just here becuase i had to add a nested list to the dictionary in the kmer_match_hash_table step
             for kmer_num, match_loc in dict.items():
-                locs.append(float(match_loc[0][0]))
-            kmer_range = max(locs) - min(locs)
-            print(kmer_range)
+                # print(len(match_loc[0]))
+                if len(match_loc[0]) <= 1:
+
+                    locs_dict[kmer_num] = match_loc[0][0:]
+                    locs_list.append(match_loc[0][0])
+                # else:
+                #     for item in match_loc[0]:
+                #         # locs_dict[kmer_num].append(item)
+                #         locs_list.append(item)
+
+                #DON'T KNOW HOW TO LOGICALLY HANDLE KMERS THAT MAP TO TOO POSITIONS
+            # print(locs_dict)
+            # print(locs_list)
+
+            kmer_range = max(locs_list) - min(locs_list)
+            # print(kmer_range)
             # kmer_range = int(kmer_range)
             read_len = int(read_len)
             if kmer_range <= read_len:
-                print('read_found')
+                first_kmer = min(locs_dict.keys())
+                first_kmer_genome_match = locs_dict[first_kmer][0]
+                read_map_locations[read_num] = first_kmer_genome_match
+                # for key, value in locs_dict.items():
+                #     if key == 1:
+                #         read_map_locations[read_num] = value
+
+
             elif kmer_range > read_len:
-                print('extra_mapping_locations')
-                sd = statistics.stdev(locs)
-                while sd > read_len and len(locs) > 3:
-                    locs.remove(max(locs))
-                    locs.remove(min(locs))
-                    print(locs)
-                    sd = statistics.stdev(locs)
-                    print("trimming locs")
-                    # print(locs)
-                    # print(sd)
+                # print('extra_mapping_locations')
+
+                # sd = statistics.stdev(locs_list)
+                while kmer_range > read_len and len(locs_list) >= 3:
+                    locs_list.remove(max(locs_list))
+                    locs_list.remove(min(locs_list))
+                    # print(locs_list)
+                    kmer_range = max(locs_list) - min(locs_list)
+                    # print(kmer_range)
+                    # sd = statistics.stdev(locs_list)
+            # print(locs_dict)
+                # for kmer_position, genome_position in locs_dict.items():
+                #     if not genome_position[0] in locs_list:
+                        # print(kmer_position)
+                        # print(genome_position)
+            # print(locs_dict)
+            # print(locs_list)
+    print(read_map_locations)
 
 
 
@@ -295,7 +332,10 @@ def main():
     # print(kmer_matching)
     #
     multi_kmer_match = hash_table_multi_kmer_matcher(genome_kmer_hash_table, full_read_kmer_hash_table)
-    #print(multi_kmer_match)
+    # print(multi_kmer_match)
+    # itemlist = list(multi_kmer_match.items())
+    # item_pos = list(map(lambda x: x[1].values(), itemlist))
+    # print("\n".join(list(map(str, item_pos))))
 
 
     # itemlist = list(multi_kmer_match.items())
