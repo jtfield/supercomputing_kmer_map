@@ -227,7 +227,7 @@ def split_genome_reverse(genome_hash_list, max_kmer_len):
 
 
 # get location information from the output of kmer matching and use this to map full reads to the location in the genome
-def full_read_location_grabber(kmer_match_hash_table, read_len):
+def full_read_location_grabber(kmer_match_hash_table, read_len, kmer_len):
     read_map_locations = {}
     for read_num, dict in kmer_match_hash_table.items():
         if len(dict) >= 3:
@@ -248,41 +248,55 @@ def full_read_location_grabber(kmer_match_hash_table, read_len):
                 #         locs_list.append(item)
 
                 #DON'T KNOW HOW TO LOGICALLY HANDLE KMERS THAT MAP TO TOO POSITIONS
-            # print(locs_dict)
-            # print(locs_list)
 
             kmer_range = max(locs_list) - min(locs_list)
-            # print(kmer_range)
+
             # kmer_range = int(kmer_range)
             read_len = int(read_len)
             if kmer_range <= read_len:
-                first_kmer = min(locs_dict.keys())
-                first_kmer_genome_match = locs_dict[first_kmer][0]
-                read_map_locations[read_num] = first_kmer_genome_match
+                if min(locs_dict.keys()) == 1:
+                    first_kmer = min(locs_dict.keys())
+                    first_kmer_genome_match = locs_dict[first_kmer][0]
+                    read_map_locations[read_num] = first_kmer_genome_match
+                elif min(locs_dict.keys()) != 1:
+                    first_kmer = min(locs_dict.keys())
+                    missing_nucs = int(first_kmer) * int(kmer_len)
+                    read_start = locs_dict[first_kmer][0] - missing_nucs
+                    read_map_locations[read_num] = read_start
+
                 # for key, value in locs_dict.items():
                 #     if key == 1:
-                #         read_map_locations[read_num] = value
+                #         first_kmer_genome_match = locs_dict[key][0]
+                #         read_map_locations[read_num] = first_kmer_genome_match
+                #     elif
+                # first_kmer = min(locs_dict.keys())
+                # first_kmer_genome_match = locs_dict[first_kmer][0]
+                # read_map_locations[read_num] = first_kmer_genome_match
 
 
             elif kmer_range > read_len:
-                # print('extra_mapping_locations')
 
-                # sd = statistics.stdev(locs_list)
+
+
                 while kmer_range > read_len and len(locs_list) >= 3:
                     locs_list.remove(max(locs_list))
                     locs_list.remove(min(locs_list))
                     # print(locs_list)
                     kmer_range = max(locs_list) - min(locs_list)
-                    # print(kmer_range)
-                    # sd = statistics.stdev(locs_list)
-            # print(locs_dict)
-                # for kmer_position, genome_position in locs_dict.items():
-                #     if not genome_position[0] in locs_list:
-                        # print(kmer_position)
-                        # print(genome_position)
-            # print(locs_dict)
-            # print(locs_list)
-    print(read_map_locations)
+            if min(locs_dict.keys()) == 1:
+                first_kmer = min(locs_dict.keys())
+                first_kmer_genome_match = locs_dict[first_kmer][0]
+                read_map_locations[read_num] = first_kmer_genome_match
+            elif min(locs_dict.keys()) != 1:
+                first_kmer = min(locs_dict.keys())
+                missing_nucs = int(first_kmer) * int(kmer_len)
+                read_start = locs_dict[first_kmer][0] - missing_nucs
+                read_map_locations[read_num] = read_start
+            # first_kmer = min(locs_dict.keys())
+            # first_kmer_genome_match = locs_dict[first_kmer][0]
+            # read_map_locations[read_num] = first_kmer_genome_match
+
+    return read_map_locations
 
 
 
@@ -362,7 +376,7 @@ def main():
 
 
 #GRAB MAPPING LOCATIONS AND CHECK IF MULTIPLE KMERS FROM A SINGLE READ FALL INTO THE SAME AREA OF THE GENOME
-    match_loc = full_read_location_grabber(multi_kmer_match, args.read_size)
+    match_loc = full_read_location_grabber(multi_kmer_match, args.read_size, size)
     print(match_loc)
 
 
