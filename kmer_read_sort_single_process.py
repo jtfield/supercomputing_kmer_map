@@ -14,6 +14,8 @@ def parse_args():
     parser.add_argument('--read_size')
     return parser.parse_args()
 
+
+
 def read_file_reader(read_file):
     # size = args.kmer_size
     # GET READ LEN TO EXTRAPOLATE KMER LENGTH
@@ -362,93 +364,132 @@ def forward_map_reads(read_locations_table, read_file, genome_file):
 def main():
     args = parse_args()
 
+
+
+
     size = args.kmer_size
+    input_file = open(args.read_file_1, 'rb')
 
-
-#PRODUCES HASH TABLE OF KMERS FROM THE NEW READ FILE
-    # read_kmer_hash_table = kmer_hash_gen(read_list, size)
-    # print(read_kmer_hash_table)
-
-    read_read_file = read_file_reader(args.read_file_1)
-    # print(read_read_file)
-    print(sys.getsizeof(read_read_file))
-
-    full_read_kmer_hash_table = full_read_kmer_hash_gen(read_read_file, size)
-    # print(full_read_kmer_hash_table)
-    # itemlist = list(full_read_kmer_hash_table.items())
-    # for item in itemlist:
-    #     print(item)
-    print(sys.getsizeof(full_read_kmer_hash_gen))
-
-
-#STRIPS NEW LINES FROM GENOME FILE
+    #STRIPS NEW LINES FROM GENOME FILE
     genome = genome_reader(args.genome_file)
-    # print(genome)
-    print(sys.getsizeof(genome))
 
-#PRODUCES HASH TABLE OF KMERS FROM THE GENOME OR LOCI
     genome_kmer_hash_table = split_genome(genome, size)
     # print(genome_kmer_hash_table)
-    print(sys.getsizeof(genome_kmer_hash_table))
+
+    while(True):
+        read_read_file = []
+        quals = []
+        line_counter = 0
+        read_counter = 0
+        for lines in range(1000000):
+            line_counter+=1
+            if line_counter == 1:
+                input_file.readline()
+            if line_counter == 2:
+
+                seq = input_file.readline()
+                # print(seq)
+                read_counter+=1
+            if line_counter == 3:
+
+                input_file.readline()
+            if line_counter == 4:
+
+                input_file.readline()
+                line_counter = 0
+                read_read_file.append(seq)
+
+            #PRODUCES HASH TABLE OF KMERS FROM THE NEW READ FILE
+            # read_kmer_hash_table = kmer_hash_gen(read_list, size)
+            # print(read_kmer_hash_table)
+
+            # read_read_file = read_file_reader(args.read_file_1)
+            # # print(read_read_file)
+            # print(sys.getsizeof(read_read_file))
+
+            full_read_kmer_hash_table = full_read_kmer_hash_gen(read_read_file, size)
+            # print(full_read_kmer_hash_table)
+            # itemlist = list(full_read_kmer_hash_table.items())
+            # for item in itemlist:
+            #     print(item)
+            print(sys.getsizeof(full_read_kmer_hash_gen))
+
+
+            # #STRIPS NEW LINES FROM GENOME FILE
+            #     genome = genome_reader(args.genome_file)
+            # print(genome)
+            # print(sys.getsizeof(genome))
+
+            #PRODUCES HASH TABLE OF KMERS FROM THE GENOME OR LOCI
+            genome_kmer_hash_table = split_genome(genome, size)
+            # print(genome_kmer_hash_table)
+            print(sys.getsizeof(genome_kmer_hash_table))
 
 
 
-    # genome_kmer_hash_table = verbose_split_genome(genome, size)
-    # itemlist = list(genome_kmer_hash_table.items())
-    # itemlist = sorted(itemlist, key=lambda x: -len(x[1]))
-    #     #print(list(map(lambda x: (x[0], x[1][0], len(x[1])), itemlist)))
-    # lenlist = list(map(lambda x: (x[0], len(x[1])), itemlist))
-    # print("\n".join(list(map(str, lenlist))))
+            # genome_kmer_hash_table = verbose_split_genome(genome, size)
+            # itemlist = list(genome_kmer_hash_table.items())
+            # itemlist = sorted(itemlist, key=lambda x: -len(x[1]))
+            #     #print(list(map(lambda x: (x[0], x[1][0], len(x[1])), itemlist)))
+            # lenlist = list(map(lambda x: (x[0], len(x[1])), itemlist))
+            # print("\n".join(list(map(str, lenlist))))
 
 
-#MATCH READ KMERS TO GENOME KMERS AND COLLECT LOCATION INFO IN NEW TABLE
-    # kmer_matching = hash_table_kmer_matcher(genome_kmer_hash_table, read_kmer_hash_table)
-    # print(kmer_matching)
+            #MATCH READ KMERS TO GENOME KMERS AND COLLECT LOCATION INFO IN NEW TABLE
+            # kmer_matching = hash_table_kmer_matcher(genome_kmer_hash_table, read_kmer_hash_table)
+            # print(kmer_matching)
 
 
-    # del read_read_file
-    multi_kmer_match = hash_table_multi_kmer_matcher(genome_kmer_hash_table, full_read_kmer_hash_table)
-    # print(multi_kmer_match)
-    print(sys.getsizeof(multi_kmer_match))
+            # del read_read_file
+            multi_kmer_match = hash_table_multi_kmer_matcher(genome_kmer_hash_table, full_read_kmer_hash_table)
+            # print(multi_kmer_match)
+            print(sys.getsizeof(multi_kmer_match))
 
 
-    # itemlist = list(multi_kmer_match.items())
-    # for item in itemlist:
-    #     for key, value in item[1].items():
-    #         for value_1 in value:
-    #             print(value_1)
+            # itemlist = list(multi_kmer_match.items())
+            # for item in itemlist:
+            #     for key, value in item[1].items():
+            #         for value_1 in value:
+            #             print(value_1)
 
-# #PERFORM GENOME KMER SPLIT FOR REVERSE COMPLIMENT KMERS
-#     reverse_genome_kmer_hash_table = split_genome_reverse(genome, size)
-#     # print(reverse_genome_kmer_hash_table)
-#
-# #READ IN SECOND SET OF READS
-#     read_read_file_2 = read_file_reader(args.read_file_2)
-#     # print(read_read_file_2)
-#
-# #HASH READS FROM FILE TWO AND ADD THEM TO HASH TABLE
-#     second_full_read_kmer_hash_table = full_read_kmer_hash_gen(read_read_file_2, size)
-#     # print(second_full_read_kmer_hash_table)
-#
-# #RUN HASH MATCH ON KMERS FROM SECOND SET OF READS AGAINST REVERSE KMER HASHED GENOME
-#     second_multi_kmer_match = hash_table_multi_kmer_matcher(reverse_genome_kmer_hash_table, second_full_read_kmer_hash_table)
-#     # print(second_multi_kmer_match)
-
-
-    del full_read_kmer_hash_table
-    del genome_kmer_hash_table
+            #PERFORM GENOME KMER SPLIT FOR REVERSE COMPLIMENT KMERS
+        #     reverse_genome_kmer_hash_table = split_genome_reverse(genome, size)
+        #     # print(reverse_genome_kmer_hash_table)
+        #
+            #READ IN SECOND SET OF READS
+        #     read_read_file_2 = read_file_reader(args.read_file_2)
+        #     # print(read_read_file_2)
+        #
+            #HASH READS FROM FILE TWO AND ADD THEM TO HASH TABLE
+        #     second_full_read_kmer_hash_table = full_read_kmer_hash_gen(read_read_file_2, size)
+        #     # print(second_full_read_kmer_hash_table)
+        #
+            #RUN HASH MATCH ON KMERS FROM SECOND SET OF READS AGAINST REVERSE KMER HASHED GENOME
+        #     second_multi_kmer_match = hash_table_multi_kmer_matcher(reverse_genome_kmer_hash_table, second_full_read_kmer_hash_table)
+        #     # print(second_multi_kmer_match)
 
 
+            del full_read_kmer_hash_table
+            del genome_kmer_hash_table
 
-#GRAB MAPPING LOCATIONS AND CHECK IF MULTIPLE KMERS FROM A SINGLE READ FALL INTO THE SAME AREA OF THE GENOME
-    match_loc = full_read_location_grabber(multi_kmer_match, args.read_size, size)
-    # print(match_loc)
-    print(sys.getsizeof(match_loc))
-    del multi_kmer_match
 
-#TESTING READ MAPPING TO THE GENOME
-    read_mapping = forward_map_reads(match_loc, args.read_file_1, genome)
-    # print(read_mapping)
-    print(sys.getsizeof(read_mapping))
+
+        #GRAB MAPPING LOCATIONS AND CHECK IF MULTIPLE KMERS FROM A SINGLE READ FALL INTO THE SAME AREA OF THE GENOME
+            match_loc = full_read_location_grabber(multi_kmer_match, args.read_size, size)
+            # print(match_loc)
+            print(sys.getsizeof(match_loc))
+            del multi_kmer_match
+
+        #TESTING READ MAPPING TO THE GENOME
+            read_mapping = forward_map_reads(match_loc, args.read_file_1, genome)
+            # print(read_mapping)
+            print(sys.getsizeof(read_mapping))
+
+        print('#########################################################################################################')
+        if len(seq) == 0:
+            break
+
+
+
 if __name__ == '__main__':
     main()
