@@ -4,7 +4,7 @@
 
 int main ( int argc, char *argv[] ) {
    FILE *fp;
-   char *arr[500] = {};
+   char arr[500];
    // int linecount = 0;
    int readcount;
    int linecount;
@@ -22,7 +22,6 @@ int main ( int argc, char *argv[] ) {
          // puts(str);
          if (readcount == 2) {
            printf("%s", str);
-           arr[linecount] = str;
          }
          else if (readcount == 4) {
            readcount = 0;
@@ -31,7 +30,7 @@ int main ( int argc, char *argv[] ) {
         }
       }
      printf("%d", readcount);
-     printf("%c", arr);
+     printf("%d", linecount);
      fclose(fp);
      return 0;
    }
