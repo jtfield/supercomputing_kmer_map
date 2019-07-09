@@ -1,58 +1,92 @@
+// principal code by Jasper Toscani Field
+// with assistance from Tingjian Zhang
+
 #include <stdio.h>
 #include <string.h>
 // #define MAX 300    /* define constants, don't use magic number in code */
+#define PART_SIZE 14
+
+
+
 
 // Function to print n equal parts of str
-void divideString(char *str)
+void divideString(char *str, char *read_kmer)
 {
   int str_size = strlen(str);
-  int i;
-  int part_size;
+  int i, part_size, num_kmers, kmer_count;
 
-  // Check if string can be divided in
-  // n equal parts
-  // if (str_size % n != 0)
-  // {
-  //     printf("Invalid Input: String size");
-  //     printf(" is not divisible by n");
-  //     return;
-  // }
+  kmer_count = 0;
 
-  // Calculate the size of parts to
-  // find the division points
+
   part_size = 14;
+  num_kmers = str_size / PART_SIZE;
+  int copy_size = str_size - str_size % PART_SIZE;
+
+  for(i = 0;i < copy_size; i++)
+    read_kmer[i] = str[i];
+
+
+  // char read_kmer[num_kmers][part_size + 1];
+/*
+  printf("%d\n", num_kmers);
   for (i = 0; i< str_size; i++)
   {
-      // if (i % part_size == 0)
-      //     printf("\n");
-      if (i == part_size){
-        printf("\n");
-        i = part_size;
-        part_size = part_size + 14;
-      }
+
+    if (i == part_size)
+    {
+      printf("\n");
+      // read_kmer[kmer_count][i + 1] = "\0";
+      i = part_size;
+      part_size = part_size + 14;
+      kmer_count++;
+    }
       printf("%c", str[i]);
+      // intermediate[i] = str[i];
+      // read_kmer[kmer_count][i] = str[i];
   }
+  // printf("%s", read_kmer[0]);
+*/
 }
 
 
 // int main () {
+#define PART_NUMBER 150
+
 int main ( int argc, char *argv[] ) {
 
   FILE *fptr;
   fptr = fopen(argv[1], "r"); // "r" for read
   // fptr = fopen("small_test_dataset/newClade_1_01.R1_.fastq","r");
-  char data[40][2][400];
+
+
+  char data[PART_NUMBER][2][400];
+  char read_kmer[PART_NUMBER][30][PART_SIZE];
+
   int i,j,k,loop,nuc_count;
+  int num_part = 0;
 
 
-  for(i = 0; i < 40; i++)
+  while(fscanf(fptr,"%s",data[i][0]) != EOF)
   {
     fscanf(fptr,"%s",data[i][0]);
     fscanf(fptr,"%s",data[i][0]);
-    fscanf(fptr,"%s",data[i][0]);
+    //fscanf(fptr,"%s",data[i][0]);
     fscanf(fptr,"%s",data[i][1]);
     fscanf(fptr,"%s",data[i][1]);
+    i++;
   }
+  num_part = i;
+
+
+  for(i = 0; i < num_part; i++)
+  {
+    printf("i = %d\n\n\n",i);
+    printf("%s\n",data[i][0]);
+    printf("%s\n",data[i][1]);
+  }
+
+
+  printf("%d\n", i);
   // printf("sssssss j = %d  j = %d\n",i,j);
   // for(loop = 0; loop < 10; loop++)
   // {
@@ -60,65 +94,25 @@ int main ( int argc, char *argv[] ) {
   //   printf("%s\n", data[loop][1]);
   // }
 
-
-  for(i = 0; i < 40; i++)
+  printf("Finish Read\n");
+  for(i = 0; i < num_part; i++)
   {
     char *str = data[i][0];
-    printf("\n");
-    divideString(str);
-    printf("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
-    printf("%s\n", data[i][0]);
-    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-    getchar();
+    printf("dddd\n the first kmer part   ");
+    divideString(str, &read_kmer[i][0][0]);
+    for(k = 0;k < 14; k++)
+      printf("%c",read_kmer[i][0][k]);
+    printf("\n the second kmer part  ");
+    for(k = 0;k < 14; k++)
+      printf("%c",read_kmer[i][1][k]);
+
+
+    //printf("%s\n",read_kmer[i][1]);
+    printf("\n\n\n\n");
+    //getchar();
   }
 
 
-  // char *string;
-  // char nuc;
-  // printf("SSSSSSSSSS\n");
-  //
-  // k = 0;
-  // char read_kmer[40][7][16];
-  // for(i = 0; i < 40; i++)
-  // {
-  //   string = data[i][0];
-    // printf("%s\n", string);
-    // printf("%d\n", i);
-
-    // for(j = 0; j < 250; j++)
-    // {
-    //   nuc = string[j];
-    //   // printf("%c", nuc);
-    //   // nuc_count++;
-    //   // // read_kmer[i][k][j] = nuc;
-    //   // if (nuc_count == 14)
-    //   // {
-    //   //   k++;
-    //   //   // j = 0;
-    //   // }
-    //   read_kmer[i][k][j] = nuc;
-    //   // printf("%c", string[j]);
-    //   // fscanf(string[j], "%c", read_kmer[i][0][j]);
-    //   // read_kmer[i][0][j]
-    // }
-    // printf("\n");
-
-  // }
-  // printf("sssssss\n");
-  // for(loop = 0; loop < 40; loop++)
-  // {
-  //   for(k = 0; k < 7; k++)
-  //   {
-  //     printf("read_kmer[%d][%d] = %s\n", loop, k, read_kmer[loop][k]);
-  //     printf("XXXXXXXXXXXXXXXXXXXXX\n");
-  //     printf("%s\n", data[loop][0]);
-  //     printf("SSSSSSSSSSSSSSSSSSSSSS\n");
-  //     printf("%d\n", loop);
-  //   }
-  //   // printf("%s\n", read_kmer[loop][1]);
-  //   // printf("%d\n", loop);
-  // }
-  // fclose(fptr);
 
 
 
