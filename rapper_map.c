@@ -10,47 +10,43 @@
 #define LOCI_LEN 5000
 
 
-// Function to print n equal parts of str
-void divideString(char *str, char *read_kmer)
+// Function to cut reads into PART_SIZE bp kmers
+void divide_read(char *str, char *read_kmer)
 {
   int str_size = strlen(str);
-  int i, part_size, num_kmers, kmer_count;
+  int i;
 
-  // kmer_count = 0;
-
-
-  // part_size = 14;
-  // num_kmers = str_size / PART_SIZE;
   int copy_size = str_size - str_size % PART_SIZE;
   // printf("%d\n", copy_size);
 
   for(i = 0;i < copy_size; i++)
     read_kmer[i] = str[i];
-    // printf("%d\n", copy_size);
 
-
-  // char read_kmer[num_kmers][part_size + 1];
-/*
-  printf("%d\n", num_kmers);
-  for (i = 0; i< str_size; i++)
-  {
-
-    if (i == part_size)
-    {
-      printf("\n");
-      // read_kmer[kmer_count][i + 1] = "\0";
-      i = part_size;
-      part_size = part_size + 14;
-      kmer_count++;
-    }
-      printf("%c", str[i]);
-      // intermediate[i] = str[i];
-      // read_kmer[kmer_count][i] = str[i];
-  }
-  // printf("%s", read_kmer[0]);
-*/
 }
 
+// Function to cut MSA sequences into kmers, overlapping by k - 1 nucleotides along the sequence length
+void divide_sequence(char *str, char *genome_kmer)
+{
+  int str_size = strlen(str);
+  int i, j, kmer_size;
+
+  // int copy_size = str_size - str_size % PART_SIZE;
+  // printf("%d\n", copy_size);
+
+  for(i = 0; i < str_size; i++)
+  {
+    // j = i;
+    kmer_size = PART_SIZE + i;
+    for(j = i; j < kmer_size; j++)
+    {
+      // genome_kmer[j] = str[j];
+      printf("%c", str[j]);
+    }
+    printf("\n");
+  }
+
+
+}
 
 // int main () {
 
@@ -58,14 +54,15 @@ void divideString(char *str, char *read_kmer)
 int main ( int argc, char *argv[] ) {
 
   FILE *fptr;
-  FILE *ffptr;
+  FILE *msaptr;
   fptr = fopen(argv[1], "r"); // "r" for read
-  ffptr = fopen(argv[2], "r");
+  msaptr = fopen(argv[2], "r");
   // fptr = fopen("small_test_dataset/newClade_1_01.R1_.fastq","r");
 
-  char msa[LOCI_COUNT][2][LOCI_LEN];
+  char msa[LOCI_COUNT][1][LOCI_LEN];
   char data[PART_NUMBER][2][400];
   char read_kmer[PART_NUMBER][30][PART_SIZE];
+  char msa_kmer[LOCI_COUNT][LOCI_LEN][PART_SIZE];
 
   int i,j,k,loop,nuc_count;
   int num_part = 0;
@@ -92,21 +89,24 @@ int main ( int argc, char *argv[] ) {
   // }
 
   j = 0;
-  while(fscanf(ffptr,"%s",msa[j][0]) != EOF)
+  while(fscanf(msaptr,"%s",msa[j][0]) != EOF)
   {
-    fscanf(ffptr,"%s",msa[j][0]);
-    fscanf(ffptr,"%s",msa[j][1]);
+    fscanf(msaptr,"%s",msa[j][0]);
+    // fscanf(msaptr,"%s",msa[j][1]);
     j++;
   }
   // num_part = i;
 
 
   printf("%d\n", j);
+
+
   for(i = 0; i < LOCI_COUNT; i++)
   {
     printf("%s\n", msa[i][0]);
     printf("SSSSSSSSSSSSSSSSSSSSS\n");
   }
+
   // printf("sssssss j = %d  j = %d\n",i,j);
   // for(loop = 0; loop < 10; loop++)
   // {
@@ -119,7 +119,7 @@ int main ( int argc, char *argv[] ) {
   {
     char *str = data[i][0];
     // printf("dddd\n the first kmer part   ");
-    divideString(str, &read_kmer[i][0][0]);
+    divide_read(str, &read_kmer[i][0][0]);
 
     // for(k = 0;k < 14; k++)
     //   printf("%c",read_kmer[i][0][k]);
@@ -136,9 +136,23 @@ int main ( int argc, char *argv[] ) {
     //getchar();
   }
 
+  printf("Beginning MSA kmer cutting\n");
+  for(i = 0; i < LOCI_COUNT; i++)
+  {
+    char *str = msa[i][0];
+    divide_sequence(str, &msa_kmer[i][0][0]);
 
+  //   for(k = 0; k < LOCI_COUNT; k++)
+  //   {
+  //     printf("%s", msa_kmer[i][0][k]);
+  //   }
+  }
+  printf("Finished MSA kmer cutting\n");
 
-
+  // for(k = 0; k < LOCI_COUNT; k++)
+  // {
+  //   printf("%s", msa_kmer[i][0][k]);
+  // }
 
   return 0;
 }
