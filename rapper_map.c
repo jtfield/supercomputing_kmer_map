@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 // #define MAX 300    /* define constants, don't use magic number in code */
-#define PART_SIZE 14
-#define PART_NUMBER 150
+#define KMER_SIZE 14
+#define READ_NUMBER 100
 #define LOCI_COUNT 10
 #define LOCI_LEN 5000
 #define READ_KMER_NUM 30
@@ -17,7 +17,7 @@ void divide_read(char *seq, char *read_kmer)
   int seq_size = strlen(seq);
   int i;
 
-  int copy_size = seq_size - seq_size % PART_SIZE;
+  int copy_size = seq_size - seq_size % KMER_SIZE;
   // printf("%d\n", copy_size);
 
   for(i = 0;i < copy_size; i++)
@@ -34,7 +34,7 @@ void divide_sequence(char *seq, char *genome_kmer)
   for(i = 0; i < seq_size; i++)
   {
     // j = i;
-    kmer_size = PART_SIZE + i;
+    kmer_size = KMER_SIZE + i;
     for(j = i; j < kmer_size; j++)
     {
       genome_kmer[j] = seq[j];
@@ -56,9 +56,9 @@ int main ( int argc, char *argv[] ) {
   // fptr = fopen("small_test_dataset/newClade_1_01.R1_.fastq","r");
 
   char msa[LOCI_COUNT][1][LOCI_LEN];
-  char data[PART_NUMBER][2][400];
+  char data[READ_NUMBER][2][400];
   // char read_kmer[PART_NUMBER][30][PART_SIZE];
-  char msa_kmer[LOCI_COUNT][LOCI_LEN][PART_SIZE];
+  char msa_kmer[LOCI_COUNT][LOCI_LEN][KMER_SIZE];
   // char best_msa_kmer_match_locs[]
 
   int i,j,k,x,n,z,loop,nuc_count;
@@ -101,57 +101,85 @@ int main ( int argc, char *argv[] ) {
     char *read;
     char *kmer;
     int seq_size = strlen(str);
-    char current_msa_kmer_match_locs[1][seq_size][PART_SIZE];
+    // char current_msa_kmer_match_locs[1][seq_size][PART_SIZE];
     // char read_kmer[PART_NUMBER][30][PART_SIZE];
 
-    int kmer_size;
+    int nucs_read;
+    int kmer_size = KMER_SIZE;
 
-    for(x = 0; x < PART_NUMBER; x++)
+
+
+    for(x = 0; x < READ_NUMBER; x++)
     {
-      char read_kmer[1][30][PART_SIZE];
+      char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       read = data[x][0];
-      printf("%s\n\n", read);
+      printf("%s\n", read);
       int read_size = strlen(read);
-      int copy_size = read_size - read_size % PART_SIZE;
-      printf("%d\n",copy_size);
-      for(i = 0;i < copy_size; i++)
+
+      divide_read(read, &kmers_for_read[0][0][0]);
+      for(j = 0; j < READ_KMER_NUM; j++)
       {
-        read_kmer[i] = read[i];
+        int hash_number = 0;
+        for(i = 0;i < KMER_SIZE;i++)
+        {
+  	      int hash = 0;
+          if(kmers_for_read[0][j][i] == 'A')
+            hash = 0;
+          if(kmers_for_read[0][j][i] == 'C')
+            hash = 1;
+          if(kmers_for_read[0][j][i] == 'G')
+            hash = 2;
+          if(kmers_for_read[0][j][i] == 'T')
+            hash = 3;
+  	      hash_number = hash_number * 4 + hash;
+        }
+        printf("%d\n", hash_number);
       }
-      // for(i = 0; i < read_size; i++)
+
+      // int hash_number = 0;
+      // for(i = 0;i < KMER_SIZE;i++)
       // {
-      //   j = i;
-      //   kmer_size = PART_SIZE + i;
-      //   for(j = i; j < kmer_size; j++)
+	    //   int hash = 0;
+      //   if(kmers_for_read[0][0][i] == 'A')
+      //     hash = 0;
+      //   if(kmers_for_read[0][0][i] == 'C')
+      //     hash = 1;
+      //   if(kmers_for_read[0][0][i] == 'G')
+      //     hash = 2;
+      //   if(kmers_for_read[0][0][i] == 'T')
+      //     hash = 3;
+	    //   hash_number = hash_number * 4 + hash;
+      // }
+      // printf("%d\n", hash_number);
+
+      // int short_hash;
+      // for(i = 0;)
+      // for(i = 0; i < READ_KMER_NUM; i++)
+      // {
+      //   for(j = 0; j < KMER_SIZE; j++)
       //   {
-      //     // current_msa_kmer_match_locs[0][i][j] = str[j];
-      //     printf("%c", str[j]);
+      //     printf("%c",kmers_for_read[0][i][j]);
       //   }
       //   printf("\n");
       // }
 
-      // for(z = 0; z < READ_KMER_NUM; z++)
-      // {
-      //   kmer = read_kmer[z][0];
-      //   printf("%s\n", kmer);
-      // }
 
-      // for(k = 0;k < 14; k++){
-      //     printf("%c",read_kmer[0][0][k]);
-      // }
-      // printf("DDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
-      // printf("%s\n", str);
-      // for(i = 0; i < str_size; i++)
+      // nucs_read = 0;
+      // for(i = 0; i < READ_KMER_NUM; i++)
       // {
-      //   j = i;
-      //   kmer_size = PART_SIZE + i;
-      //   for(j = i; j < kmer_size; j++)
+      //
+      //   for(j = nucs_read; j < kmer_size; j++)
       //   {
-      //     // current_msa_kmer_match_locs[0][i][j] = str[j];
-      //     printf("%c", str[j]);
+      //     printf("%c", data[x][0][j]);
+      //
       //   }
+      //   nucs_read = nucs_read + KMER_SIZE;
+      //   kmer_size = kmer_size + KMER_SIZE;
       //   printf("\n");
       // }
+
+
+
     }
   }
 
