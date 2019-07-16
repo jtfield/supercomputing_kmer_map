@@ -53,24 +53,24 @@ int main ( int argc, char *argv[] ) {
   FILE *msaptr;
   fptr = fopen(argv[1], "r"); // "r" for read
   msaptr = fopen(argv[2], "r");
-  // fptr = fopen("small_test_dataset/newClade_1_01.R1_.fastq","r");
+  //fptr = fopen("small_test_dataset/newClade_1_01.R1_.fastq","r");
 
   char msa[LOCI_COUNT][1][LOCI_LEN];
   char data[READ_NUMBER][2][400];
   // char read_kmer[PART_NUMBER][30][PART_SIZE];
   char msa_kmer[LOCI_COUNT][LOCI_LEN][KMER_SIZE];
   // char best_msa_kmer_match_locs[]
-
-  int i,j,k,x,n,z,loop,nuc_count;
+  int i = 0;
+  int j,k,x,n,z,loop,nuc_count;
   int num_part = 0;
   int loci_count = 0;
   
   
   int Char_map_Int[200];
   
-  for(i = 0; i < 200; i++)
+  for(z = 0; z < 200; z++)
   {
-    Char_map_Int[i] = 5;
+    Char_map_Int[z] = 5;
   }
 
   Char_map_Int['A' - '0'] = 0;
@@ -81,7 +81,10 @@ int main ( int argc, char *argv[] ) {
   Char_map_Int['c' - '0'] = 1;
   Char_map_Int['g' - '0'] = 2;
   Char_map_Int['t' - '0'] = 3;
-// READ READS FILE IN TO ARRAY
+
+  
+  
+  // READ READS FILE IN TO ARRAY
   while(fscanf(fptr,"%s",data[i][0]) != EOF)
   {
     fscanf(fptr,"%s",data[i][0]);
@@ -90,16 +93,15 @@ int main ( int argc, char *argv[] ) {
     fscanf(fptr,"%s",data[i][1]);
     i++;
   }
-  // num_part = i;
-  //
-  // printf("%d\n", i);
-  // for(i = 0; i < num_part; i++)
-  // {
-  //   printf("i = %d\n\n\n",i);
-  //   printf("%s\n",data[i][0]);
-  //   printf("%s\n",data[i][1]);
-  // }
-
+  printf("%s\n", data[2][0]);
+  
+  /*
+  for(i = 0; i < READ_NUMBER; i++)
+   {
+     printf("i = %d\n\n\n",i);
+     printf("%s\n",data[i][1]);
+   }
+   */
 
 // READ IN MSA FILE TO ARRAY
   k = 0;
@@ -130,41 +132,61 @@ int main ( int argc, char *argv[] ) {
     {
       char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       read = data[x][0];
+      int read_hash_array[1][READ_KMER_NUM];
       printf("%s\n", read);
       int read_size = strlen(read);
 
-      divide_read(read, &kmers_for_read[0][0][0]);
+      divide_read(read, &kmers_for_read[x][0][0]);
+
       for(j = 0; j < READ_KMER_NUM; j++)
       {
         int read_hash_number = 0;
         for(i = 0;i < KMER_SIZE;i++)
         {
+	  //printf("%c\n", kmers_for_read[0][j][i]);
+
+
   	  int hash = 0;
           hash = Char_map_Int[kmers_for_read[0][j][i] - '0']; 
   	  read_hash_number = read_hash_number * 4 + hash;
         }
-        printf("%d\n", read_hash_number);
+        printf("READ_HASH_NUMBER_%d\n", read_hash_number);
+	read_hash_array[0][j] = read_hash_number;
       }
 
       int msa_hash_number = 0;
       for(i = 0; i < KMER_SIZE; i++)
       {
-        printf("%c", str[i]);
+        //printf("%c", str[i]);
         int hash = 0;
         hash = Char_map_Int[str[i] - '0']; 
         msa_hash_number = msa_hash_number * 4 + hash;
       }
-      printf("MSA_HASH_NUMBER_%d\n", msa_hash_number);
+      //printf("MSA_HASH_NUMBER_%d\n", msa_hash_number);
+      for(i = 0; i < READ_KMER_NUM; i++)
+      {
+	if(read_hash_array[0][i] == msa_hash_number)
+	{
+	  printf("FOUND HASH MATCH\n");
+  	}
+      }	
 
       for( ; i < seq_size; i++)
       {
-        printf("%c\n", str[i]);
+        //printf("%c\n", str[i]);
         int hash = 0;
         hash = Char_map_Int[str[i] - '0']; 
         int sub_hash = Char_map_Int[str[i - KMER_SIZE] - '0'];
-	printf("sub = %d has = %d\n", sub_hash, hash);
+	//printf("sub = %d has = %d\n", sub_hash, hash);
 	msa_hash_number = msa_hash_number * 4 + hash - (sub_hash << 28);
         printf("MSA_HASH_NUMBER_   %d\n", msa_hash_number);
+	for(j = 0; j < READ_KMER_NUM; j++)
+	{
+	 if(read_hash_array[0][i] == msa_hash_number)
+          {
+            printf("FOUND HASH MATCH\n");
+          }
+        }
       }
 
 
