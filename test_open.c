@@ -107,7 +107,8 @@ int main ( int argc, char *argv[] ) {
 
 
 
- /* KMER HASHING AND MATCHING CODE BLOCK */
+ /* KMER HASHING AND MATCHING CODE BLOCK 
+  * START BY LOOPING THROUGH EACH SEQUENCE IN THE MSA */
 
   for(n = 0; n < 1; n++)
   {
@@ -116,12 +117,10 @@ int main ( int argc, char *argv[] ) {
     char *kmer;
     char *nuc;
     int seq_size = strlen(str);
-
-    int nucs_read;
     int kmer_size;
 
 
-    
+   /* LOOP THROUGH READS AND BEGIN CUTTING INTO KMERS */ 
     for(x = 0; x < 1; x++)
     {
       char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
@@ -142,7 +141,6 @@ int main ( int argc, char *argv[] ) {
   	  int hash = 0;
           hash = Char_map_Int[kmers_for_read[0][j][i] - '0'];
   	  read_hash_number = read_hash_number * 4 + hash;
-	  //read_hash_number = read_hash_number + (hash * (i * 100));
         }
 	read_hash_array[0][j] = read_hash_number;
 	printf("mas = %d\n", read_hash_number);
@@ -158,7 +156,6 @@ int main ( int argc, char *argv[] ) {
         msa_hash_number = msa_hash_number * 4 + hash;
       }
 
-
       for(i = 0; i < READ_KMER_NUM; i++)
       {
 	if(read_hash_array[0][i] == msa_hash_number)
@@ -166,7 +163,8 @@ int main ( int argc, char *argv[] ) {
 	  printf("FOUND HASH MATCH\n");
   	}
       }
-      
+     
+     /* 
       for(i = 0; i < seq_size; i++)
       {
         // j = i;
@@ -203,9 +201,9 @@ int main ( int argc, char *argv[] ) {
     printf("char = %c ps = %d %d\n",z,z,Char_map_Int[z]);
   }
 
-
+*/
       printf("END\n");
-      /*
+      
       for( ; i < seq_size; i++)
       {
         //printf("%c\n", str[i]);
@@ -217,56 +215,13 @@ int main ( int argc, char *argv[] ) {
         printf("MSA_HASH_NUMBER_   %d\n", msa_hash_number);
 	for(j = 0; j < READ_KMER_NUM; j++)
 	{
-	 if(read_hash_array[0][i] == msa_hash_number)
+	 if(read_hash_array[0][j] == msa_hash_number)
           {
-            printf("FOUND HASH MATCH\n");
+            printf("FOUND HASH MATCH seq position:%d  read kmer:%d\n", i, j);
           }
         }
       }
-      */
-
-      // int hash_number = 0;
-      // for(i = 0;i < KMER_SIZE;i++)
-      // {
-	    //   int hash = 0;
-      //   if(kmers_for_read[0][0][i] == 'A')
-      //     hash = 0;
-      //   if(kmers_for_read[0][0][i] == 'C')
-      //     hash = 1;
-      //   if(kmers_for_read[0][0][i] == 'G')
-      //     hash = 2;
-      //   if(kmers_for_read[0][0][i] == 'T')
-      //     hash = 3;
-	    //   hash_number = hash_number * 4 + hash;
-      // }
-      // printf("%d\n", hash_number);
-
-      // int short_hash;
-      // for(i = 0;)
-      // for(i = 0; i < READ_KMER_NUM; i++)
-      // {
-      //   for(j = 0; j < KMER_SIZE; j++)
-      //   {
-      //     printf("%c",kmers_for_read[0][i][j]);
-      //   }
-      //   printf("\n");
-      // }
-
-
-      // nucs_read = 0;
-      // for(i = 0; i < READ_KMER_NUM; i++)
-      // {
-      //
-      //   for(j = nucs_read; j < kmer_size; j++)
-      //   {
-      //     printf("%c", data[x][0][j]);
-      //
-      //   }
-      //   nucs_read = nucs_read + KMER_SIZE;
-      //   kmer_size = kmer_size + KMER_SIZE;
-      //   printf("\n");
-      // }
-
+      
     }
   }
   
