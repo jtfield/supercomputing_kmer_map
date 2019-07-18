@@ -64,9 +64,9 @@ int main ( int argc, char *argv[] ) {
   int num_part = 0;
   int loci_count = 0;
  
-  int B_Char_map_Int[300];
+  int B_Char_map_Int[3000];
 
-  for(z = 0; z < 300; z++)
+  for(z = 0; z < 3000; z++)
   {
     //Char_map_Int[z] = -1 * (1 << 29);
     B_Char_map_Int[z] = 5;
@@ -145,11 +145,6 @@ int main ( int argc, char *argv[] ) {
       printf("read_km_number = %d\n", read_km_number);
       */
 
-      for(i = 0; i < 200; i++)
-      {
-	printf("%d", B_Char_map_Int[i]);
-      }
-      printf("\n");
       
       char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       char *read = data[x][0];
@@ -160,12 +155,21 @@ int main ( int argc, char *argv[] ) {
       divide_read(read, &kmers_for_read[x][0][0]);
       printf("read_km_number %d\n", read_km_number);
       printf("kmer nucleotide size %d\n", KMER_SIZE);
+      
+      /*
+      for(z = 0; z < 300; z++)
+      {
+        //Char_map_Int[z] = -1 * (1 << 29);
+        B_Char_map_Int[z] = 5;
+      }
+      */
 
 
       /* HASHES GENERATED FOR THE KMERS FROM THE READ */
       printf("***SPLITTING AND HASHING READ***\n");
       for(j = 0; j < read_km_number; j++)
       {
+	/*      
         int Char_map_Int[300];
 
 	for(z = 0; z < 300; z++)
@@ -183,13 +187,10 @@ int main ( int argc, char *argv[] ) {
 	Char_map_Int['c' - '0'] = 1;
 	Char_map_Int['g' - '0'] = 2;
 	Char_map_Int['t' - '0'] = 3;
-
+        
 	
 	printf("read_hash_array values PRE_HASHING   %d\n", read_hash_array[x][j]);
-	//read_hash_array[0][j] = 0;
         int read_hash_number = 0;
-	//int* read_hash_number = malloc(sizeof(int));
-        //*read_hash_number = safe_hasher;
 
         for(i = 0;i < KMER_SIZE;i++)
         {
@@ -207,16 +208,71 @@ int main ( int argc, char *argv[] ) {
         }
 	read_hash_array[x][j] = read_hash_number;
 	printf("mas = %d\n", read_hash_number);
-	//read_hash_number = 0;
 	printf("reset mas = %d\n", read_hash_number);
 	printf("\n\n\n");
-	//free(read_hash_number);
       }
+      */
+      int read_hash_number = 0;
+      for (i = 0; i < KMER_SIZE; i++)
+      {
+	int read_hash = 0;
+	int ps = kmers_for_read[x][j][i];
+	if (ps == 'A')
+        {
+          read_hash = 0;
+        }
+        else if (ps == 'C')
+        {
+          read_hash = 1;
+        }
+        else if (ps == 'G')
+        {
+          read_hash = 2;
+        }
+        else if (ps == 'T')
+        {
+          read_hash = 3;
+        }
+        else if (ps == 'a')
+        {
+          read_hash = 0;
+        }
+        else if (ps == 'c')
+        {
+          read_hash = 1;
+        }
+        else if (ps == 'g')
+        {
+          read_hash = 2;
+        }
+        else if (ps == 't')
+        {
+          read_hash = 3;
+        }
+        read_hash_number = read_hash_number * 4 + read_hash;
+	read_hash = 0;
+      }
+        read_hash_array[x][j] = read_hash_number;
+        printf("mas = %d\n", read_hash_number);
+        printf("reset mas = %d\n", read_hash_number);
+        printf("\n\n\n");
+	
+	read_hash_number = 0;
+    }
 
-      
+
+
+
+
+
+
+
+
+
 
 
       /* HASHES GENERATED FOR THE KMERS FROM THE SEQUENCE */
+      /*
       int msa_hash_number = 0;
       for(i = 0; i < KMER_SIZE; i++)
       {
@@ -225,7 +281,7 @@ int main ( int argc, char *argv[] ) {
         msa_hash_number = msa_hash_number * 4 + hash;
       }
 
-      for(i = 0; i < READ_KMER_NUM; i++)
+      for(i = 0; i < read_km_number; i++)
       {
 	if(read_hash_array[x][i] == msa_hash_number)
 	{
@@ -233,64 +289,125 @@ int main ( int argc, char *argv[] ) {
   	}
       }
       msa_hash_number = 0;
-     /* 
-      for(i = 0; i < seq_size; i++)
-      {
-        // j = i;
-        int msa_hash_number = 0;
-        kmer_size = KMER_SIZE + i;
-        for(j = i; j < kmer_size; j++)
-        {
-	  int hash = 0;
-	  int ps = str[j] - '0';
-          hash = Char_map_Int[ps];
-#ifdef TEST_
-	  printf("%c", str[j]);
-	  printf("postion=%d",str[j] - '0');
-	  printf(" %d ",hash);
-#endif
-	  msa_hash_number = msa_hash_number * 4 + hash;
-        }
-#ifdef TEST_
-        printf("\n");
-	printf("%d\n",msa_hash_number);
-#endif
-        for(k = 0; k < read_km_number; k++)
-        {
-          //if(read_hash_array[0][k] == msa_hash_number && read_hash_array[0][k] != 0)
-          if(read_hash_array[0][k] == msa_hash_number)
-          {
-            printf("HASH MATCH FOUND at for read_kmer %d at position %d %d  %d\n", k, i, msa_hash_number);
-          }
-        }
-      }
+      */
       
-  for(z = 0; z < 200; z++)
-  {
-    printf("char = %c ps = %d %d\n",z,z,Char_map_Int[z]);
-  }
-
-*/
       printf("***SEQUENCE HASHING SLIDING WINDOW***\n");
-      
-      for( ; i < seq_size; i++)
+      int msa_hash_number = 0;
+      for(i = 0 ; i < seq_size; i++)
       {
+	/*
         //printf("%c\n", str[i]);
         int hash = 0;
+	printf("  hash = %d  ", hash);
         hash = B_Char_map_Int[str[i] - '0'];
+	printf("   new hash= %d  ", hash);
         int sub_hash = B_Char_map_Int[str[i - KMER_SIZE] - '0'];
 	//printf("sub = %d has = %d\n", sub_hash, hash);
 	msa_hash_number = msa_hash_number * 4 + hash - (sub_hash << 28);
-        //printf("MSA_HASH_NUMBER_   %d\n", msa_hash_number);
-	for(j = 0; j < READ_KMER_NUM; j++)
+        printf("MSA_HASH_NUMBER_   %d\n", msa_hash_number);
+
+	for(j = 0; j < read_km_number; j++)
 	{
+         printf("%d\n", read_hash_array[x][j]); 
 	 if(read_hash_array[x][j] == msa_hash_number)
           {
-            printf("FOUND HASH MATCH seq position:%d  read kmer:%d\n", i, j);
+            printf("FOUND HASH MATCH seq position:%d  read kmer:%d of read %d\n", i, j, x);
           }
         }
-        
+        */
+      
+        //printf("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD%cDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n\n\n\n", str[i]);
+      //printf("%c\n", str[i]);
+        int hash = 0;
+        //printf("  hash = %d  ", hash);
+	if (str[i] == 'A')
+	{
+	  hash = 0;
+	}
+	else if (str[i] == 'C')
+	{
+	  hash = 1;
+	}
+	else if (str[i] == 'G')
+	{
+	  hash = 2;
+	}
+	else if (str[i] == 'T')
+	{
+	  hash = 3;
+	}
+	else if (str[i] == 'a')
+        {
+          hash = 0;
+        }
+        else if (str[i] == 'c')
+        {
+          hash = 1;
+        }
+        else if (str[i] == 'g')
+        {
+          hash = 2;
+        }
+        else if (str[i] == 't')
+        {
+          hash = 3;
+        }
+
+        //hash = B_Char_map_Int[str[i] - '0'];
+        //printf("   new hash= %d  ", hash);
+        //int sub_hash = B_Char_map_Int[str[i - KMER_SIZE] - '0'];
+	int sub_hash = 0;
+	if(str[i - KMER_SIZE] == 'A')
+        {
+          sub_hash = 0;
+        }
+	else if(str[i - KMER_SIZE] == 'C')
+        {
+          sub_hash = 1;
+        }
+	else if(str[i - KMER_SIZE] == 'G')
+        {
+          sub_hash = 2;
+        }
+	else if(str[i - KMER_SIZE] == 'T')
+        {
+          sub_hash = 3;
+        }
+	else if (str[i - KMER_SIZE] == 'a')
+        {
+          sub_hash = 0;
+        }
+        else if (str[i - KMER_SIZE] == 'c')
+        {
+          sub_hash = 1;
+        }
+        else if (str[i - KMER_SIZE] == 'g')
+        {
+          sub_hash = 2;
+        }
+        else if (str[i - KMER_SIZE] == 't')
+        {
+          sub_hash = 3;
+        }
+
+        //printf("sub = %d has = %d\n", sub_hash, hash);
+        msa_hash_number = msa_hash_number * 4 + hash - (sub_hash << 28);
+        //printf("MSA_HASH_NUMBER_   %d\n", msa_hash_number);
+
+        for(j = 0; j < read_km_number; j++)
+        {
+         //printf("%d\n", read_hash_array[x][j]);
+         if(read_hash_array[x][j] == msa_hash_number)
+          {
+            printf("FOUND HASH MATCH seq position:%d  read kmer:%d of read %d\n", i, j, x);
+          }
+        }
+	hash = 0;
+	sub_hash = 0;
+      
+       
       }
+      msa_hash_number = 0;
       /*
       printf("END OF READ HASH ARRAY = %d\n",read_hash_array[0][0]);
       memset(read_hash_array, 0, sizeof read_hash_array);
@@ -304,15 +421,6 @@ int main ( int argc, char *argv[] ) {
 	
       }
     
-      /*
-      memset(Char_map_Int, 5, sizeof Char_map_Int);
-      printf("\n\n\n");
-      for(z = 0; z < 200; z++)
-      {
-        printf("%d", Char_map_Int[z]);
-
-      }
-      */
     }
   }
   
