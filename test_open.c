@@ -60,13 +60,13 @@ int main ( int argc, char *argv[] ) {
   // char read_kmer[PART_NUMBER][30][PART_SIZE];
   //char msa_kmer[LOCI_COUNT][LOCI_LEN][KMER_SIZE];
   int i = 0;
-  int j,k,x,n,z,loop,nuc_count;
+  int j,k,x,n,z,loop,read_count;
   int num_part = 0;
   int loci_count = 0;
  
-  int B_Char_map_Int[3000];
+  int B_Char_map_Int[300];
 
-  for(z = 0; z < 3000; z++)
+  for(z = 0; z < 300; z++)
   {
     //Char_map_Int[z] = -1 * (1 << 29);
     B_Char_map_Int[z] = 5;
@@ -83,17 +83,18 @@ int main ( int argc, char *argv[] ) {
   B_Char_map_Int['t' - '0'] = 3;
 
 
+
   // READ READS FILE IN TO ARRAY
-  while(fscanf(fptr,"%s",data[i][0]) != EOF)
+  while(fscanf(fptr,"%s",data[read_count][0]) != EOF)
   {
-    fscanf(fptr,"%s",data[i][0]);
-    fscanf(fptr,"%s",data[i][0]);
-    fscanf(fptr,"%s",data[i][1]);
-    fscanf(fptr,"%s",data[i][1]);
-    i++;
+    fscanf(fptr,"%s",data[read_count][0]);
+    fscanf(fptr,"%s",data[read_count][0]);
+    fscanf(fptr,"%s",data[read_count][1]);
+    fscanf(fptr,"%s",data[read_count][1]);
+    read_count++;
   }
-  printf("%s\n", data[0][0]);
-  printf("%s\n", data[1][0]);
+
+  printf("TOTAL READ COUNT IN READ FILE = %d\n", read_count);
 
 // READ IN MSA FILE TO ARRAY
   k = 0;
@@ -111,9 +112,10 @@ int main ( int argc, char *argv[] ) {
  /* KMER HASHING AND MATCHING CODE BLOCK 
   * START BY LOOPING THROUGH EACH SEQUENCE IN THE MSA */
 
-  for(n = 0; n < 1; n++)
+  for(n = 0; n < 2; n++)
   {
     char *str = msa[n][0];
+    printf("%s\n", str);
     //char *read;
     char *kmer;
     char *nuc;
@@ -129,6 +131,7 @@ int main ( int argc, char *argv[] ) {
       /*
       printf(" READ NUMBER= %d\n", x);
       char *read = data[x][0];
+      printf("%s\n", read);
       int read_size = strlen(read);
       printf("Raw read size = %d", read_size);
 
@@ -148,7 +151,8 @@ int main ( int argc, char *argv[] ) {
       
       char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       char *read = data[x][0];
-      int read_hash_array[READ_NUMBER][READ_KMER_NUM];
+      printf("%s\n", read);
+      int read_hash_array[read_count][READ_KMER_NUM];
       int read_size = strlen(read);
       int read_km_number = (read_size) / KMER_SIZE;
       
@@ -217,6 +221,7 @@ int main ( int argc, char *argv[] ) {
       {
 	int read_hash = 0;
 	int ps = kmers_for_read[x][j][i];
+	printf("%c", ps);
 	if (ps == 'A')
         {
           read_hash = 0;
@@ -252,12 +257,12 @@ int main ( int argc, char *argv[] ) {
         read_hash_number = read_hash_number * 4 + read_hash;
 	read_hash = 0;
       }
-        read_hash_array[x][j] = read_hash_number;
-        printf("mas = %d\n", read_hash_number);
-        printf("reset mas = %d\n", read_hash_number);
-        printf("\n\n\n");
-	
-	read_hash_number = 0;
+       printf("\n");
+       read_hash_array[x][j] = read_hash_number;
+       //printf("mas = %d\n", read_hash_number);
+       //printf("reset mas = %d\n", read_hash_number);
+       //printf("\n\n\n");
+       read_hash_number = 0;
     }
 
 
@@ -413,14 +418,14 @@ int main ( int argc, char *argv[] ) {
       memset(read_hash_array, 0, sizeof read_hash_array);
       printf("FRESH READ HASH ARRAY = %d\n", read_hash_array[0][0]);
       */
-
+      /*
       printf("WAFFLE\n");
       for(z = 0; z < 200; z++)
       {
 	printf("%d", B_Char_map_Int[z]);
 	
       }
-    
+      */
     }
   }
   
