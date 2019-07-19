@@ -127,7 +127,7 @@ int main ( int argc, char *argv[] ) {
  /* KMER HASHING AND MATCHING CODE BLOCK 
   * START BY LOOPING THROUGH EACH SEQUENCE IN THE MSA */
 
-  for(n = 0; n < 2; n++)
+  for(n = 0; n < LOCI_COUNT; n++)
   {
     char *str = msa[n][0];
     printf("%s\n", str);
@@ -140,7 +140,7 @@ int main ( int argc, char *argv[] ) {
 
    /* LOOP THROUGH READS AND BEGIN CUTTING INTO KMERS */
     printf("BEGIN LOOPING THROUGH READS\n"); 
-    for(x = 0; x < 2; x++)
+    for(x = 0; x < read_count; x++)
     {
       
       /*
@@ -166,7 +166,7 @@ int main ( int argc, char *argv[] ) {
       
       char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       char *read = data[x][0];
-      printf("%s\n", read);
+      //printf("%s\n", read);
       //int read_hash_array[read_count][READ_KMER_NUM];
       int ** read_hash_array = (int ** )malloc(N_ROW * sizeof(int *));
       for(i = 0; i < N_ROW; i++)
@@ -180,17 +180,9 @@ int main ( int argc, char *argv[] ) {
       printf("read_km_number %d\n", read_km_number);
       printf("kmer nucleotide size %d\n", KMER_SIZE);
       
-      /*
-      for(z = 0; z < 300; z++)
-      {
-        //Char_map_Int[z] = -1 * (1 << 29);
-        B_Char_map_Int[z] = 5;
-      }
-      */
-
 
       /* HASHES GENERATED FOR THE KMERS FROM THE READ */
-      printf("***SPLITTING AND HASHING READ***\n");
+      //printf("***SPLITTING AND HASHING READ***\n");
       for(j = 0; j < read_km_number; j++)
       {
 	/*      
@@ -223,7 +215,7 @@ int main ( int argc, char *argv[] ) {
       {
 	int read_hash = 0;
 	int ps = kmers_for_read[x][j][i];
-	printf("%c", ps);
+	//printf("%c", ps);
 	switch(ps)
 	{
 	  case 'A':
@@ -366,7 +358,8 @@ int main ( int argc, char *argv[] ) {
          if(read_hash_array[x][j] == msa_hash_number)
           {
             printf("FOUND HASH MATCH seq position:%d  read kmer:%d of read %d\n", i, j, x);
-          }
+            printf("%s\n", read);
+	  }
         }
 	hash = 0;
 	sub_hash = 0;
@@ -387,6 +380,7 @@ int main ( int argc, char *argv[] ) {
 	
       }
       */
+      free(read_hash_array);
     }
   }
   free(data);
