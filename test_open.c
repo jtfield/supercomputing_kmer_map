@@ -4,12 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-// #define MAX 300    /* define constants, don't use magic number in code */
 #define KMER_SIZE 14
 #define READ_NUMBER 100
 #define LOCI_COUNT 10
 #define LOCI_LEN 5000
 #define READ_KMER_NUM 30
+#define N_ROW 3000000
+#define N_COL 2
+#define N_CHAR 300
 
 // Function to cut reads into PART_SIZE bp kmers
 void divide_read(char *seq, char *read_kmer)
@@ -54,16 +56,16 @@ int main ( int argc, char *argv[] ) {
   fptr = fopen(argv[1], "r"); // "r" for read
   msaptr = fopen(argv[2], "r");
   //fptr = fopen("small_test_dataset/newClade_1_01.R1_.fastq","r");
-
+  char read_count_buf[400];
   char msa[LOCI_COUNT][1][LOCI_LEN];
-  char data[READ_NUMBER][2][400];
-  // char read_kmer[PART_NUMBER][30][PART_SIZE];
-  //char msa_kmer[LOCI_COUNT][LOCI_LEN][KMER_SIZE];
+  //char data[READ_NUMBER][2][400];
   int i = 0;
-  int j,k,x,n,z,loop,read_count;
+  int j,k,x,n,z,loop;
+  int read_count = 0;
   int num_part = 0;
   int loci_count = 0;
- 
+  
+  /*
   int B_Char_map_Int[300];
 
   for(z = 0; z < 300; z++)
@@ -81,6 +83,20 @@ int main ( int argc, char *argv[] ) {
   B_Char_map_Int['c' - '0'] = 1;
   B_Char_map_Int['g' - '0'] = 2;
   B_Char_map_Int['t' - '0'] = 3;
+  */
+
+  char *** data = (char *** )malloc(N_ROW * sizeof(char ** )) ;
+
+  //Allocate memroy for each row
+
+  for(int i = 0 ; i < N_ROW ; i++ )
+  {
+    data[i] = (char ** ) malloc(N_COL * sizeof(char * )) ;
+    for ( int j = 0 ; j < N_COL ; j++ )
+    {
+        data[i][j] = (char *) malloc (N_CHAR * sizeof(char));
+    }
+  }
 
 
 
@@ -94,8 +110,6 @@ int main ( int argc, char *argv[] ) {
     read_count++;
   }
 
-  printf("TOTAL READ COUNT IN READ FILE = %d\n", read_count);
-
 // READ IN MSA FILE TO ARRAY
   k = 0;
   while(fscanf(msaptr,"%s",msa[k][0]) != EOF)
@@ -104,7 +118,8 @@ int main ( int argc, char *argv[] ) {
     k++;
   }
 
-
+  fclose(fptr);
+  fclose(msaptr);
 
 
 
@@ -174,24 +189,6 @@ int main ( int argc, char *argv[] ) {
       for(j = 0; j < read_km_number; j++)
       {
 	/*      
-        int Char_map_Int[300];
-
-	for(z = 0; z < 300; z++)
-	{
-	  //Char_map_Int[z] = -1 * (1 << 29);
-	  Char_map_Int[z] = 5;
-	}
-	
-	
-	Char_map_Int['A' - '0'] = 0;
-	Char_map_Int['C' - '0'] = 1;
-	Char_map_Int['G' - '0'] = 2;
-	Char_map_Int['T' - '0'] = 3;
-	Char_map_Int['a' - '0'] = 0;
-	Char_map_Int['c' - '0'] = 1;
-	Char_map_Int['g' - '0'] = 2;
-	Char_map_Int['t' - '0'] = 3;
-        
 	
 	printf("read_hash_array values PRE_HASHING   %d\n", read_hash_array[x][j]);
         int read_hash_number = 0;
@@ -222,38 +219,25 @@ int main ( int argc, char *argv[] ) {
 	int read_hash = 0;
 	int ps = kmers_for_read[x][j][i];
 	printf("%c", ps);
-	if (ps == 'A')
-        {
-          read_hash = 0;
-        }
-        else if (ps == 'C')
-        {
-          read_hash = 1;
-        }
-        else if (ps == 'G')
-        {
-          read_hash = 2;
-        }
-        else if (ps == 'T')
-        {
-          read_hash = 3;
-        }
-        else if (ps == 'a')
-        {
-          read_hash = 0;
-        }
-        else if (ps == 'c')
-        {
-          read_hash = 1;
-        }
-        else if (ps == 'g')
-        {
-          read_hash = 2;
-        }
-        else if (ps == 't')
-        {
-          read_hash = 3;
-        }
+	switch(ps)
+	{
+	  case 'A':
+	  case 'a':
+	    read_hash = 0;
+	    break;
+	  case 'C':
+          case 'c':
+            read_hash = 1;
+            break;
+	  case 'G':
+          case 'g':
+            read_hash = 2;
+            break;
+	  case 'T':
+          case 't':
+            read_hash = 3;
+            break;
+	}
         read_hash_number = read_hash_number * 4 + read_hash;
 	read_hash = 0;
       }
@@ -325,76 +309,48 @@ int main ( int argc, char *argv[] ) {
       //printf("%c\n", str[i]);
         int hash = 0;
         //printf("  hash = %d  ", hash);
-	if (str[i] == 'A')
-	{
-	  hash = 0;
-	}
-	else if (str[i] == 'C')
-	{
-	  hash = 1;
-	}
-	else if (str[i] == 'G')
-	{
-	  hash = 2;
-	}
-	else if (str[i] == 'T')
-	{
-	  hash = 3;
-	}
-	else if (str[i] == 'a')
+	switch(str[i])
         {
-          hash = 0;
+          case 'A':
+          case 'a':
+            hash = 0;
+            break;
+          case 'C':
+          case 'c':
+            hash = 1;
+            break;
+          case 'G':
+          case 'g':
+            hash = 2;
+            break;
+          case 'T':
+          case 't':
+            hash = 3;
+            break;
         }
-        else if (str[i] == 'c')
-        {
-          hash = 1;
-        }
-        else if (str[i] == 'g')
-        {
-          hash = 2;
-        }
-        else if (str[i] == 't')
-        {
-          hash = 3;
-        }
-
         //hash = B_Char_map_Int[str[i] - '0'];
         //printf("   new hash= %d  ", hash);
         //int sub_hash = B_Char_map_Int[str[i - KMER_SIZE] - '0'];
 	int sub_hash = 0;
-	if(str[i - KMER_SIZE] == 'A')
+	switch(str[i - KMER_SIZE])
         {
-          sub_hash = 0;
+          case 'A':
+          case 'a':
+            sub_hash = 0;
+            break;
+          case 'C':
+          case 'c':
+            sub_hash = 1;
+            break;
+          case 'G':
+          case 'g':
+            sub_hash = 2;
+            break;
+          case 'T':
+          case 't':
+            sub_hash = 3;
+            break;
         }
-	else if(str[i - KMER_SIZE] == 'C')
-        {
-          sub_hash = 1;
-        }
-	else if(str[i - KMER_SIZE] == 'G')
-        {
-          sub_hash = 2;
-        }
-	else if(str[i - KMER_SIZE] == 'T')
-        {
-          sub_hash = 3;
-        }
-	else if (str[i - KMER_SIZE] == 'a')
-        {
-          sub_hash = 0;
-        }
-        else if (str[i - KMER_SIZE] == 'c')
-        {
-          sub_hash = 1;
-        }
-        else if (str[i - KMER_SIZE] == 'g')
-        {
-          sub_hash = 2;
-        }
-        else if (str[i - KMER_SIZE] == 't')
-        {
-          sub_hash = 3;
-        }
-
         //printf("sub = %d has = %d\n", sub_hash, hash);
         msa_hash_number = msa_hash_number * 4 + hash - (sub_hash << 28);
         //printf("MSA_HASH_NUMBER_   %d\n", msa_hash_number);
