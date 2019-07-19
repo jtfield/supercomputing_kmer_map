@@ -167,7 +167,12 @@ int main ( int argc, char *argv[] ) {
       char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       char *read = data[x][0];
       printf("%s\n", read);
-      int read_hash_array[read_count][READ_KMER_NUM];
+      //int read_hash_array[read_count][READ_KMER_NUM];
+      int ** read_hash_array = (int ** )malloc(N_ROW * sizeof(int *));
+      for(i = 0; i < N_ROW; i++)
+      {
+	read_hash_array[i] = (int *)malloc(READ_KMER_NUM * sizeof(int));
+      }
       int read_size = strlen(read);
       int read_km_number = (read_size) / KMER_SIZE;
       
@@ -384,7 +389,7 @@ int main ( int argc, char *argv[] ) {
       */
     }
   }
-  
+  free(data);
 
 
   printf("Finish Read\n");
