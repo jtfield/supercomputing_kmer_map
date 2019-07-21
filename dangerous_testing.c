@@ -12,7 +12,7 @@
 #define N_ROW 1000
 #define N_COL 2
 #define N_CHAR 300
-#define MAX_READ_LOOP 1000
+#define MAX_READ_LOOP 30
 
 
 // Function to cut reads into PART_SIZE bp kmers
@@ -66,7 +66,7 @@ int main ( int argc, char *argv[] ) {
   int read_count = 0;
   int num_part = 0;
   int loci_count = 0;
-  
+  int total_read_count = 0; 
   /*
   int B_Char_map_Int[300];
 
@@ -117,6 +117,7 @@ int main ( int argc, char *argv[] ) {
     fscanf(fptr,"%s",data[read_count][1]);
     fscanf(fptr,"%s",data[read_count][1]);
     read_count++;
+    total_read_count++;
     printf("%d\n", read_count);
     if (read_count == MAX_READ_LOOP)
     {
@@ -150,11 +151,12 @@ int main ( int argc, char *argv[] ) {
 	    read_hash_array[i] = (int *)malloc(READ_KMER_NUM * sizeof(int));
           }
           int read_size = strlen(read);
-          int read_km_number = (read_size) / KMER_SIZE;
+          int read_km_number = (read_size) / KMER_SIZE + 1;
       
           divide_read(read, &kmers_for_read[x][0][0]);
           printf("read_km_number %d\n", read_km_number);
           printf("kmer nucleotide size %d\n", KMER_SIZE);
+	  printf("%p\n", &kmers_for_read[x][0][0]);
       
 
           /* HASHES GENERATED FOR THE KMERS FROM THE READ */
@@ -286,7 +288,7 @@ int main ( int argc, char *argv[] ) {
 
   free(data);
 
-
+  printf("%d\n", total_read_count);
   printf("Finish Read\n");
 
 
