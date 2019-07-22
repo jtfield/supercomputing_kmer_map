@@ -55,7 +55,6 @@ int main ( int argc, char *argv[] ) {
   FILE *msaptr;
   fptr = fopen(argv[1], "r"); // "r" for read
   msaptr = fopen(argv[2], "r");
-  //fptr = fopen("small_test_dataset/newClade_1_01.R1_.fastq","r");
   char read_count_buf[400];
   char msa[LOCI_COUNT][1][LOCI_LEN];
   //char data[READ_NUMBER][2][400];
@@ -168,11 +167,12 @@ int main ( int argc, char *argv[] ) {
       char *read = data[x][0];
       //printf("%s\n", read);
       //int read_hash_array[read_count][READ_KMER_NUM];
-      int ** read_hash_array = (int ** )malloc(N_ROW * sizeof(int *));
-      for(i = 0; i < N_ROW; i++)
-      {
-	read_hash_array[i] = (int *)malloc(READ_KMER_NUM * sizeof(int));
-      }
+      int read_hash_array[1][READ_KMER_NUM];
+      //int ** read_hash_array = (int ** )malloc(2 * sizeof(int *));
+      //for(i = 0; i < N_ROW; i++)
+      //{
+	//read_hash_array[i] = (int *)malloc(READ_KMER_NUM * sizeof(int));
+      //}
       int read_size = strlen(read);
       int read_km_number = (read_size) / KMER_SIZE;
       
@@ -210,6 +210,7 @@ int main ( int argc, char *argv[] ) {
 	printf("\n\n\n");
       }
       */
+      printf("READHASHNUM\n");
       int read_hash_number = 0;
       for (i = 0; i < KMER_SIZE; i++)
       {
@@ -239,10 +240,10 @@ int main ( int argc, char *argv[] ) {
 	read_hash = 0;
       }
        printf("\n");
-       read_hash_array[x][j] = read_hash_number;
-       //printf("mas = %d\n", read_hash_number);
-       //printf("reset mas = %d\n", read_hash_number);
-       //printf("\n\n\n");
+       read_hash_array[0][j] = read_hash_number;
+       printf("mas = %d\n", read_hash_number);
+       printf("reset mas = %d\n", read_hash_number);
+       printf("\n\n\n");
        read_hash_number = 0;
     }
 
@@ -355,7 +356,7 @@ int main ( int argc, char *argv[] ) {
         for(j = 0; j < read_km_number; j++)
         {
          //printf("%d\n", read_hash_array[x][j]);
-         if(read_hash_array[x][j] == msa_hash_number)
+         if(read_hash_array[0][j] == msa_hash_number)
           {
             printf("FOUND HASH MATCH seq position:%d  read kmer:%d of read %d\n", i, j, x);
             printf("%s\n", read);
@@ -380,6 +381,14 @@ int main ( int argc, char *argv[] ) {
 	
       }
       */
+      for (i = 0; i < 2; i++);
+      {
+	 for (j = 0; j < N_ROW; j++)
+	 {
+		 free(read_hash_array[i][j]);
+	 }
+      }
+
       free(read_hash_array);
     }
   }
