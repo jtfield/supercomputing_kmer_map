@@ -146,6 +146,7 @@ int main ( int argc, char *argv[] ) {
       //char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       char *read = data[x];
       printf("%s\n", read);
+      printf("READ NUMBER = %d LOCI NUMBER = %d\n", x, n);
       //int read_hash_array[read_count][READ_KMER_NUM];
       //int read_hash_array[1][READ_KMER_NUM];
       //int ** read_hash_array = (int ** )malloc(2 * sizeof(int *));
@@ -178,15 +179,6 @@ int main ( int argc, char *argv[] ) {
         
       /* HASHES GENERATED FOR THE KMERS FROM THE READ */
       //printf("***SPLITTING AND HASHING READ***\n");
-      //for(j = 0; j < read_km_number; j++)
-      //{
-        //printf("READHASHNUM\n");
-        //int read_hash_number = 0;
-        //for (i = 0; i < KMER_SIZE; i++)
-        //{
-	  //int read_hash = 0;
-	  //int ps = kmers_for_read[0][j][i];
-	  //printf("%d\n",j);
 	  switch(ps)
 	  {
 	    case 'A':
@@ -312,17 +304,17 @@ int main ( int argc, char *argv[] ) {
       }
 
       free(read_hash_array);*/
-      printf("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP\n");
-      printf("%d\n", read_count);
+      //printf("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP\n");
+      //printf("%d\n", total_read_count);
     }
-    printf("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
+    //printf("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
 
    }
   //free(data);
-  }
+  
  
   //printf("%d", n);
-  }
+  
   printf("Finish Read\n");
 
 
