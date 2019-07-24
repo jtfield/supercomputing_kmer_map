@@ -7,7 +7,7 @@
 #define KMER_SIZE 14
 #define READ_NUMBER 5001
 #define LOCI_COUNT 10
-#define LOCI_LEN 5000
+#define LOCI_LEN 5000000
 #define READ_KMER_NUM 30
 //#define N_ROW 5001
 //#define N_COL 2
@@ -56,18 +56,21 @@ int main ( int argc, char *argv[] ) {
   fptr = fopen(argv[1], "r"); // "r" for read
   msaptr = fopen(argv[2], "r");
   char read_count_buf[400];
-  char msa[LOCI_COUNT][1][LOCI_LEN];
+  //char msa[LOCI_COUNT][1][LOCI_LEN];
   char read_buf[400];
   //char data[READ_NUMBER][2][600];
+  char msa_buf[LOCI_LEN];
   int i = 0;
   int j,k,x,n,z,loop;
   int read_count = 0;
   int num_part = 0;
   int loci_count = 0;
-  int total_read_count;
+  int total_read_count = 0;
+  int total_seq_count = 0;
   const int STEPSIZE = 100;
   int arrlen = STEPSIZE;
-
+  const int MSA_STEPSIZE = 1;
+  int msa_arrlen = MSA_STEPSIZE;
 
 // CONSTRUCT A DYNAMIC MEMORY ARRAY TO HOLD THE READS WITHOUT REQUIRING KNOWING HOW MANY READS ARE IN THE FILE
 //##############################################################################################  
@@ -114,12 +117,54 @@ int main ( int argc, char *argv[] ) {
 
 // READ IN MSA FILE TO ARRAY
 //#############################################################################################
-  k = 0;
+  /*
+   k = 0;
   while(fscanf(msaptr,"%s",msa[k][0]) != EOF)
   {
     fscanf(msaptr,"%s",msa[k][0]);
     k++;
   }
+  */
+
+  char **msa = (char **)malloc(MSA_STEPSIZE * sizeof(char *));
+
+// READ IN MSA FILE TO ARRAY
+  k = 0;
+  while(fgets(msa_buf, sizeof(msa_buf), msaptr))
+  {
+
+    if ( total_seq_count == msa_arrlen)
+    {
+        msa_arrlen += MSA_STEPSIZE;
+        char ** msa_newlines = realloc(msa, msa_arrlen * sizeof(char * ));
+        if (!msa_newlines)
+        {
+                fprintf(stderr, "can't realloc\n");
+                exit(1);
+        }
+        msa = msa_newlines;
+        printf("d\n");
+    }
+    k++;
+    if (k == 2)
+    {
+        //printf("%s\n", msa_buf);
+        //printf("k = %d\n", k);
+        //printf("seq number = %d\n", total_seq_count);
+        //printf("%s\n", msa_buf);
+        msa_buf[strlen(msa_buf) - 1] = '\0';
+        int seq_len = strlen(msa_buf);
+        printf("seq leng = %d\n", seq_len);
+        char *seq = (char *)malloc((seq_len + 1) * sizeof(char));
+        strcpy(seq, msa_buf);
+
+        msa[total_seq_count] = seq;
+        total_seq_count++;
+        k = 0;
+
+    }
+  }
+
 //############################################################################################
 
 
@@ -127,9 +172,9 @@ int main ( int argc, char *argv[] ) {
  /* KMER HASHING AND MATCHING CODE BLOCK
   * START BY LOOPING THROUGH EACH SEQUENCE IN THE MSA */
 
-  for(n = 0; n < LOCI_COUNT; n++)
+  for(n = 0; n < total_seq_count; n++)
   {
-    char *str = msa[n][0];
+    char *str = msa[n];
     //printf("%s\n", str);
     //char *read;
     char *kmer;
@@ -145,7 +190,7 @@ int main ( int argc, char *argv[] ) {
 
       //char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       char *read = data[x];
-      printf("%s\n", read);
+      //printf("%s\n", read);
       printf("READ NUMBER = %d LOCI NUMBER = %d\n", x, n);
       //int read_hash_array[read_count][READ_KMER_NUM];
       //int read_hash_array[1][READ_KMER_NUM];
