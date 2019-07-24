@@ -67,10 +67,14 @@ int main ( int argc, char *argv[] ) {
   int loci_count = 0;
   int total_read_count = 0;
   int total_seq_count = 0;
+  int match_count = 0;
   const int STEPSIZE = 100;
   int arrlen = STEPSIZE;
   const int MSA_STEPSIZE = 1;
   int msa_arrlen = MSA_STEPSIZE;
+  const int MATCH_STEPSIZE = 1000;
+  int match_arrlen = MATCH_STEPSIZE;
+
 
 // CONSTRUCT A DYNAMIC MEMORY ARRAY TO HOLD THE READS WITHOUT REQUIRING KNOWING HOW MANY READS ARE IN THE FILE
 //##############################################################################################  
@@ -143,7 +147,7 @@ int main ( int argc, char *argv[] ) {
                 exit(1);
         }
         msa = msa_newlines;
-        printf("d\n");
+        //printf("d\n");
     }
     k++;
     if (k == 2)
@@ -154,7 +158,7 @@ int main ( int argc, char *argv[] ) {
         //printf("%s\n", msa_buf);
         msa_buf[strlen(msa_buf) - 1] = '\0';
         int seq_len = strlen(msa_buf);
-        printf("seq leng = %d\n", seq_len);
+        //printf("seq leng = %d\n", seq_len);
         char *seq = (char *)malloc((seq_len + 1) * sizeof(char));
         strcpy(seq, msa_buf);
 
@@ -168,8 +172,20 @@ int main ( int argc, char *argv[] ) {
 //############################################################################################
 
 
+//START DYNAMIC MATCH ARRAY
+//############################################################################################
  
- /* KMER HASHING AND MATCHING CODE BLOCK
+int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
+
+//############################################################################################
+ 
+  
+  
+  
+  
+  
+  
+  /* KMER HASHING AND MATCHING CODE BLOCK
   * START BY LOOPING THROUGH EACH SEQUENCE IN THE MSA */
 
   for(n = 0; n < total_seq_count; n++)
@@ -190,7 +206,7 @@ int main ( int argc, char *argv[] ) {
 
       //char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       char *read = data[x];
-      printf("%s\n", read);
+      //printf("%s\n", read);
       printf("READ NUMBER = %d LOCI NUMBER = %d\n", x, n);
       //int read_hash_array[read_count][READ_KMER_NUM];
       //int read_hash_array[1][READ_KMER_NUM];
@@ -315,48 +331,54 @@ int main ( int argc, char *argv[] ) {
          //printf("read_kmer = %d\n", read_hash_array[0][j]);
          if(read_hash_array[0][j] == msa_hash_number)
           {
-            printf("FOUND HASH MATCH seq position:%d  read kmer:%d of read %d\n", i, j, x);
+//############################################################
+            printf("FOUND HASH MATCH seq position:%d in loci: %d read kmer:%d of read %d\n", i, n, j, x);
             //printf("%s\n", read);
+	    //match_count++;
+	    if(match_count == match_arrlen)
+	    {
+	      match_arrlen += MATCH_STEPSIZE;
+              int ** match_newlines = realloc(match, match_arrlen * sizeof(int * ));
+              if (!match_newlines)
+                {
+                  fprintf(stderr, "can't realloc\n");
+                  exit(1);
+                }
+              match = match_newlines;
+	      printf("waffle\n");
+	    }
+	    match[match_count] = (int *)malloc(4 * sizeof(int));
+	    match[match_count][0] = x;
+	    match[match_count][1] = j;
+	    match[match_count][2] = n;
+	    match[match_count][3] = i;
+	    printf("DOUBLEWAFFLE\n");
+	    match_count++;
+	    
+//############################################################
 	  }
         }
 	hash = 0;
-	//printf("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n");
 	sub_hash = 0;
 
 
       }
       msa_hash_number = 0;
 
-      //printf("END OF READ HASH ARRAY = %d\n",read_hash_array[0][0]);
-      /*memset(read_hash_array, 0, sizeof read_hash_array);
-      printf("FRESH READ HASH ARRAY = %d\n", read_hash_array[0][0]);
-      */
-      /*
-      printf("WAFFLE\n");
-      for(z = 0; z < 200; z++)
-      {
-	printf("%d", B_Char_map_Int[z]);
-
-      }
-      */
-      /*
-      for (i = 0; i < 2; i++);
-      {
-	 for (j = 0; j < N_ROW; j++)
-	 {
-		 free(read_hash_array[i][j]);
-	 }
-      }
-
-      free(read_hash_array);*/
-      //printf("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP\n");
-      //printf("%d\n", total_read_count);
     }
-    //printf("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n");
 
    }
   //free(data);
   
+  for(i = 0; i < match_count; i++)
+  {
+	  for(j = 0; j < 4; j++)
+	  {
+		  printf("  %d   ", match[i][j]);
+	  }
+	  printf("\n");
+  }
+
  
   //printf("%d", n);
   
