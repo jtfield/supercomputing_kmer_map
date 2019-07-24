@@ -207,7 +207,7 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
       //char kmers_for_read[1][READ_KMER_NUM][KMER_SIZE];
       char *read = data[x];
       //printf("%s\n", read);
-      printf("READ NUMBER = %d LOCI NUMBER = %d\n", x, n);
+      //printf("READ NUMBER = %d LOCI NUMBER = %d\n", x, n);
       //int read_hash_array[read_count][READ_KMER_NUM];
       //int read_hash_array[1][READ_KMER_NUM];
       //int ** read_hash_array = (int ** )malloc(2 * sizeof(int *));
@@ -216,7 +216,7 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
 	//read_hash_array[i] = (int *)malloc(READ_KMER_NUM * sizeof(int));
       //}
       int read_size = strlen(read);
-      printf("read size = %d\n", read_size);
+      //printf("read size = %d\n", read_size);
       int read_km_number = read_size / KMER_SIZE;
       int read_hash_array[1][read_km_number + 2];
       //char kmers_for_read[1][read_km_number + 2][KMER_SIZE + 2];
@@ -258,6 +258,8 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
             case 't':
               read_hash = 3;
               break;
+	    default :
+	      read_hash = 4;
 	  }
           read_hash_number = read_hash_number * 4 + read_hash;
 	  read_hash = 0;
@@ -271,7 +273,7 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
       }
 
 
-      printf("***SEQUENCE HASHING SLIDING WINDOW***\n");
+      //printf("***SEQUENCE HASHING SLIDING WINDOW***\n");
       int msa_hash_number = 0;
       for(i = 0 ; i < seq_size; i++)
       {
@@ -297,6 +299,8 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
           case 't':
             hash = 3;
             break;
+	  default :
+	    hash = 4;
         }
         //hash = B_Char_map_Int[str[i] - '0'];
        // printf("   new hash= %d  ", hash);
@@ -320,6 +324,8 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
           case 't':
             sub_hash = 3;
             break;
+	  default :
+	    sub_hash = 4;
         }
         //printf("sub = %d has = %d\n", sub_hash, hash);
         msa_hash_number = msa_hash_number * 4 + hash - (sub_hash << 28);
@@ -332,7 +338,7 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
          if(read_hash_array[0][j] == msa_hash_number)
           {
 //############################################################
-            printf("FOUND HASH MATCH seq position:%d in loci: %d read kmer:%d of read %d\n", i, n, j, x);
+            //printf("FOUND HASH MATCH seq position:%d in loci: %d read kmer:%d of read %d\n", i, n, j, x);
             //printf("%s\n", read);
 	    //match_count++;
 	    if(match_count == match_arrlen)
@@ -345,14 +351,12 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
                   exit(1);
                 }
               match = match_newlines;
-	      printf("waffle\n");
 	    }
 	    match[match_count] = (int *)malloc(4 * sizeof(int));
 	    match[match_count][0] = x;
 	    match[match_count][1] = j;
 	    match[match_count][2] = n;
 	    match[match_count][3] = i;
-	    printf("DOUBLEWAFFLE\n");
 	    match_count++;
 	    
 //############################################################
@@ -375,10 +379,12 @@ int **match = (int **)malloc(MATCH_STEPSIZE * sizeof(int *));
 	  for(j = 0; j < 4; j++)
 	  {
 		  printf("  %d   ", match[i][j]);
+		  //free(&match[i][j]);
 	  }
 	  printf("\n");
+          //free(match[i]);
   }
-
+  //free(match);
  
   //printf("%d", n);
   
