@@ -50,14 +50,19 @@ int main ( int argc, char *argv[] ) {
   MPI_Status status;
   int my_id, root_process, ierr, num_rows, num_procs,
          an_id, num_rows_to_receive, avg_rows_per_process, 
-         sender, num_rows_received, start_row, end_row, num_rows_to_send, avg_reads_per_process, avg_reads_to_receive, reads_to_receive;
+         sender, num_rows_received, start_row, end_row, num_rows_to_send, avg_reads_per_process, avg_reads_to_receive, reads_to_receive,
+	 start, stop, start_num, stop_num;
   ierr = MPI_Init(&argc, &argv);
   root_process = 0;
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &my_id);
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
   char data_local[1000000];
-  int data_pos_local[100000];
+  int data_pos_local[1000000];
+  char msa_data_local[2000000];
+  char read_buffer[400];
+  //char *data_local = (char *)malloc(1000000 * sizeof(char));
 
+  //int *data_pos_local = (int *)malloc(10000000 * sizeof(int));
 
   if(my_id == root_process)
   {
@@ -194,7 +199,7 @@ int main ( int argc, char *argv[] ) {
     num_rows_to_send = end_row - start_row + 1;
     */
     //sent_reads+=avg_reads_per_process;
-    printf("%d\n", sent_reads); 
+    //printf("%d\n", sent_reads); 
     int reads_to_send = READ_LEN * avg_reads_per_process;
 
     //SEND THE POSITION DATA ARRAY
@@ -214,7 +219,7 @@ int main ( int argc, char *argv[] ) {
            an_id, send_data_tag, MPI_COMM_WORLD);
     
     sent_reads+=avg_reads_per_process;
-    printf("%d\n", sent_reads);
+    //printf("%d\n", sent_reads);
 
    }    
   }
@@ -226,7 +231,7 @@ int main ( int argc, char *argv[] ) {
 
     ierr = MPI_Recv( &avg_reads_to_receive, 1, MPI_INT, 
                root_process, send_data_tag, MPI_COMM_WORLD, &status);
-    printf("wwwwwwwww%d\n", avg_reads_to_receive);      
+    //printf("wwwwwwwww%d\n", avg_reads_to_receive);      
     ierr = MPI_Recv( &data_pos_local, avg_reads_to_receive, MPI_INT, 
                root_process, send_data_tag, MPI_COMM_WORLD, &status);
 
@@ -236,8 +241,13 @@ int main ( int argc, char *argv[] ) {
 
     ierr = MPI_Recv( &data_local, reads_to_receive, MPI_CHAR,
                root_process, send_data_tag, MPI_COMM_WORLD, &status);
-    
-   printf("PPPPPPPPPPPPPPPPPp%c\n", data_local[1]);
+   /* 
+   for(i = 0; i < avg_reads_to_receive; i++)
+   {
+	   printf("XXX%d\n", data_pos_local[i]);
+   }
+   */
+
    /*
    int reads_received = avg_reads_to_receive;
    for(i = 0; i < reads_received; i++)
@@ -245,8 +255,28 @@ int main ( int argc, char *argv[] ) {
     printf("%d\n", data_pos_local[i]);
   }    
   */
+   start_num = 0;
+   stop_num = 1;
+   start = data_pos_local[start_num];
+   stop = data_pos_local[stop_num];
+   printf("START = %d STOP = %d", start, stop);
+   for( i = 0; i < avg_reads_to_receive; i++)
+   {
+      //printf("%c", data_local[i]);
+      printf("start = %d stop = %d\n",start , stop);
+     
+     for( j = start; j < stop; j++)
+     {
+       printf("%c", data_local[j]);
 
-
+     }
+     printf("\n");
+     start_num++;
+     stop_num++;
+     start = data_pos_local[start_num];
+     stop = data_pos_local[stop_num]; 
+   }
+   printf("\n%d\n", avg_reads_to_receive);
 
   }
 //END OF INDIVIDUAL PROCESSOR/CORE JOBS
