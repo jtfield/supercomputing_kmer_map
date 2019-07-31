@@ -25,7 +25,7 @@ int main ( int argc, char *argv[] ) {
   char read_buf[400];
   char msa_buf[LOCI_LEN];
   int i = 0;
-  int j,k,x,n,z,loop;
+  int j,k,x,n,z,loop,p,q,r;
   z = 0;
   int read_count = 0;
   int num_part = 0;
@@ -88,7 +88,12 @@ int main ( int argc, char *argv[] ) {
     read_count++;
     if(read_count == 2)
     {
-      int start_pos = (strlen(data));
+      int start_pos = (strlen(read_buf));
+      //int start_pos = (strlen(data));
+      
+      data_pos[total_read_count] = start_pos;
+      
+      /*
       if(start_pos == 0)
       {
 	data_pos[total_read_count] = (start_pos);
@@ -98,7 +103,8 @@ int main ( int argc, char *argv[] ) {
 	data_pos[total_read_count] = (start_pos + 1);
 	reads_nuc_sum+=strlen(read_buf);
       }
-
+      */
+      reads_nuc_sum+=strlen(read_buf);
       //data_pos[total_read_count] = start_pos;
       //printf("%d\n", start_pos);
       read_buf[strlen(read_buf) - 1] = '\0';
@@ -113,7 +119,13 @@ int main ( int argc, char *argv[] ) {
     }
   }
   avg_read_size = reads_nuc_sum / total_read_count;
-  //printf("all nucs in read seq = %d\n", reads_nuc_sum);
+  printf("all nucs in read seq = %d\n", reads_nuc_sum);
+  /*
+  for(i = 0; i < total_read_count; i++)
+  {
+	  printf("%d\n", data_pos[i]);
+  }
+  */
   //printf("\n");
   
 //##############################################################################################
@@ -180,7 +192,13 @@ int main ( int argc, char *argv[] ) {
            an_id, send_data_tag, MPI_COMM_WORLD);
     ierr = MPI_Send( &data[starting_nuc], reads_to_send, MPI_CHAR,
            an_id, send_data_tag, MPI_COMM_WORLD);
-    
+    /* 
+    for(i = 0; i < reads_to_send; i++)
+    {
+	    printf("%c", data[i]);
+    }
+    */
+
     sent_reads+=avg_reads_per_process;
     starting_nuc+=reads_to_send;
     printf("FINISHED SENDING READ DATA AND READ POSITIONAL INFO\n");
@@ -219,8 +237,8 @@ int main ( int argc, char *argv[] ) {
 
     ierr = MPI_Recv( &data_local, reads_to_receive, MPI_CHAR,
     	    root_process, send_data_tag, MPI_COMM_WORLD, &status);
-
     
+    printf("RECEIVED CONCATENATED READ DATA\n");
     // RECEIVE DATA FOR MSA
     ierr = MPI_Recv( &avg_seq_len_local, 1, MPI_INT,
                root_process, send_data_tag, MPI_COMM_WORLD, &status);
@@ -228,9 +246,10 @@ int main ( int argc, char *argv[] ) {
     ierr = MPI_Recv( &total_seq_count_local, 1, MPI_INT,
                root_process, send_data_tag, MPI_COMM_WORLD, &status);
     
-    
+    printf("RECEIVED SEQUENCE INFORMATION\n");
 //###################################################################################
-//RECEIVE MSA INDIVIDUAL SEQUENCES AND BEGIN LOOPING READS OVER THEM    
+//RECEIVE MSA INDIVIDUAL SEQUENCES AND BEGIN LOOPING READS OVER THEM
+    printf("BEGINNING TO RECEIVE MSA SEQUENCES AND PERFORMING READ MAPPING\n");    
     for(n = 0; n < total_seq_count_local; n++)
     {
 	    
@@ -247,15 +266,17 @@ int main ( int argc, char *argv[] ) {
       for( z = 0; z < avg_reads_to_receive - 2; z++)
       {
 	loop = 0;
-        if(data_pos_local[z + 1] != 0)
+	//printf("%d\n", data_pos_local[z]);
+	pos = data_pos_local[z];
+	//########################################################
+        for( k = 0; k < pos; k++)
         {
-          pos = (data_pos_local[z + 1] - data_pos_local[z]);
+          read_buffer[k] = data_local[counted_nucs + k];
+          
+	  //printf("%c", read_buffer[k]);
         }
-        for( j = 0; j < pos; j++)
-        {
-          read_buffer[j] = data_local[counted_nucs + j];
-          counted_nucs++;
-        }
+	counted_nucs += pos;
+	//printf("\n");
         int len = strlen(read_buffer);
         char *read = read_buffer;
         int read_size = strlen(read);
@@ -271,6 +292,7 @@ int main ( int argc, char *argv[] ) {
             window++;
             int read_hash = 0;
             int ps = read[i];
+	    //printf("%c", ps);
         
             /* HASHES GENERATED FOR THE KMERS FROM THE READ */
 	    switch(ps)
@@ -297,6 +319,7 @@ int main ( int argc, char *argv[] ) {
             read_hash_number = read_hash_number * 4 + read_hash;
 	    read_hash = 0;
           }
+	  //printf("\n");
           read_hash_array[0][j] = read_hash_number;
           read_hash_number = 0;
         }
@@ -304,36 +327,37 @@ int main ( int argc, char *argv[] ) {
 
         //printf("***SEQUENCE HASHING SLIDING WINDOW***\n");
         int msa_hash_number = 0;
-	printf("msa_hash_number = %d\n", msa_hash_number);
+	//printf("msa_hash_number = %d\n", msa_hash_number);
         for(i = 0 ; i < seq_size; i++)
         {
-          printf("%c\n", str[i]);
-          int hash = 0;
+          //printf("%c\n", str[i]);
+          int msa_hash = 0;
 	  //hash = 0;
-	  printf("reguar msa hash = %c\n", hash);
+	  //printf("reguar msa hash = %d\n", msa_hash);
 	  switch(str[i])
           {
             case 'A':
             case 'a':
-              hash = 0;
+              msa_hash = 0;
               break;
             case 'C':
             case 'c':
-              hash = 1;
+              msa_hash = 1;
               break;
             case 'G':
             case 'g':
-              hash = 2;
+              msa_hash = 2;
               break;
             case 'T':
             case 't':
-              hash = 3;
+              msa_hash = 3;
               break;
 	    default :
-	      hash = 4;
+	      msa_hash = 4;
           }
+	  //printf("reguar msa hash = %d    nuc = %c", msa_hash, str[i]);
 	  int sub_hash = 0;
-	  printf("SUB HASH = %d\n", sub_hash);
+	  //printf("SUB HASH = %d\n", sub_hash);
 	  switch(str[i - KMER_SIZE])
           {
             case 'A':
@@ -355,15 +379,16 @@ int main ( int argc, char *argv[] ) {
 	    default :
 	      sub_hash = 4;
           }
-          msa_hash_number = msa_hash_number * 4 + hash - (sub_hash << 28);
+	  //printf("sub_hash = %d\n", sub_hash);
+          msa_hash_number = msa_hash_number * 4 + msa_hash - (sub_hash << 28);
           for(j = 0; j < read_km_number; j++)
           {
-            printf("read kmer = %d   msa kmer = %d\n", read_hash_array[0][j], msa_hash_number);
+            //printf("read kmer = %d   msa kmer = %d\n", read_hash_array[0][j], msa_hash_number);
             if(read_hash_array[0][j] == msa_hash_number)
             {
 //############################################################
               printf("FOUND HASH MATCH seq position:%d in loci: %d read kmer:%d of read %d\n", i, n, j, z);
-              //printf("%s\n", read);
+              printf("%s\n", read);
 	      //match_count++;
 	      /*
 	      if(match_count == match_arrlen)
@@ -390,7 +415,7 @@ int main ( int argc, char *argv[] ) {
 	  }
 	 }
 	//printf("msa hash = %d\n", hash);
-	hash = 0;
+	msa_hash = 0;
 	sub_hash = 0;
 	  
 //####################################################################
@@ -436,46 +461,10 @@ int main ( int argc, char *argv[] ) {
     }
 //####################################################################
 
-   /*
-   start_num = 0;
-   stop_num = 1;
-   start = data_pos_local[start_num];
-   stop = data_pos_local[stop_num];
-   //printf("START = %d STOP = %d", start, stop);
-   for( i = 0; i < avg_reads_to_receive; i++)
-   {
-      loop = 0;
-      //printf("%c", data_local[i]);
-      //printf("start = %d stop = %d\n",start , stop);
-     
-     for( j = start; j < stop; j++)
-     {
-       //printf("%c", data_local[j]);
-       read_buffer[loop] = data_local[j];
-       loop++;
-     }
-     */
-
-
-
-
-
-
-    /*
-
-     //printf("\n");
-     start_num++;
-     stop_num++;
-     start = data_pos_local[start_num];
-     stop = data_pos_local[stop_num]; 
-   }
-   printf("\n%d\n", avg_reads_to_receive);
-   */
-//
 //END OF INDIVIDUAL PROCESSOR/CORE JOBS
 //############################################################################
 
-
+  
 
 ierr = MPI_Finalize();
 
