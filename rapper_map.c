@@ -180,6 +180,7 @@ int main ( int argc, char *argv[] ) {
   //printf("the number of leftover reads = %d\n", leftover_reads);
   int leftover_reads_len = avg_read_size * leftover_reads;
   //printf("the length of the leftover reads is = %d nucleotides\n", leftover_reads_len);
+  /*
   int sent_reads = 0;
   int nucs_starting_pos = 0;
   int reads_starting_pos = 0;
@@ -189,56 +190,106 @@ int main ( int argc, char *argv[] ) {
   int send_stage = 0;
   int an_id = 1;
   int read_count = avg_reads_per_process;
+  */
+  int numbers_of_reads[num_procs];
+  int procs_read_numbers[num_procs + 1];
+  procs_read_numbers[0] = 0;
+  int procs_reads_starting_pos[num_procs + 1];
+  procs_reads_starting_pos[0] = 0;
+  int procs_nucleotide_number[num_procs + 1];
+  //procs_nucleotide_number[0] = 0;
+  int procs_read_start_position[num_procs + 1];
+  procs_read_start_position[0] = 0;
+  int procs_nucleotide_start_position[num_procs + 1];
+  procs_nucleotide_start_position[0] = 0;
+  int read_count = 0;
+  int read_count_buffer = 0;
+  int proc_count = 1;
+  int read_len;
+  int total_nucs = 0;
+  int read_len_counter = 0;
+  int reads_per_proc;
+  my_id = 1;
+  for(i = 0; i < total_read_count; i++)
+  {
+     read_len = data_pos[i];
+     read_count += read_len;
+     read_len_counter++;
+     total_nucs += read_len;
+     if(read_len_counter == avg_reads_per_process || i == (total_read_count - 1))
+     {
+       printf("nucleotides for each  proccessor = %d\n", read_count);
+       //reads_per_proc = 
+       procs_nucleotide_number[my_id] = read_count;
+       procs_read_numbers[my_id] = i;
+       procs_nucleotide_start_position[my_id] = total_nucs;
+       printf("nucleotide starting position = %d\n", total_nucs);
+       printf("i = %d\n", i);
+       read_count = 0;
+       read_len_counter = 0;
+       my_id++;
+     }
+  }
+   
+  for(an_id = 1; an_id < num_procs; an_id++)
+  {
+        
+    //nucs_starting_pos = reads_this_stage;
+    //reads_starting_pos = read_count;
+    //send info message
+    ierr = MPI_Send( &procs_read_numbers[an_id], 1 , MPI_INT,
+           an_id, send_data_tag, MPI_COMM_WORLD);
+
+    ierr = MPI_Send( &data_pos[procs_read_numbers[an_id - 1]], procs_read_numbers[an_id], MPI_INT,
+           an_id, send_data_tag, MPI_COMM_WORLD);
+    printf("FINISHED SENDING POSITIONAL READ DATA\n");
+
+         //SEND THE STRING OF READS
+    ierr = MPI_Send( &procs_nucleotide_number[an_id], 1 , MPI_INT,
+           an_id, send_data_tag, MPI_COMM_WORLD);
+
+    ierr = MPI_Send( &data[procs_nucleotide_start_position[an_id - 1]], procs_nucleotide_number[an_id], MPI_CHAR,
+           an_id, send_data_tag, MPI_COMM_WORLD); 
+  
+    //SEND MSA DATA
+    printf("SENDING MSA DATA\n");
+    ierr = MPI_Send( &avg_seq_len, 1 , MPI_INT,
+           an_id, send_data_tag, MPI_COMM_WORLD);
+
+    ierr = MPI_Send( &total_seq_count, 1 , MPI_INT,
+           an_id, send_data_tag, MPI_COMM_WORLD);
+
+    for(n = 0; n < total_seq_count; n++)
+    {
+      ierr = MPI_Send( &msa[n][0], avg_seq_len, MPI_CHAR,
+           an_id, send_data_tag, MPI_COMM_WORLD);
+    } 
+
+
+
+
+
+
+   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /*
   for(j = 0; j < total_read_count; j++)
   {
     sent_reads = data_pos[j];
     reads_this_stage += sent_reads;
     
     if((j == total_read_count - 1) || j >= read_count)
-    {  /*
-       if(an_id < num_procs)
-       {
-         //nucs_starting_pos = reads_this_stage;
-         //reads_starting_pos = read_count;
-         printf("reads this stage = %d     current step = %d    for id = %d\n", reads_this_stage, read_count, an_id);
-         printf("nucleotide starting position = %d     reads starting position = %d\n", nucs_starting_pos, reads_starting_pos);
-         //send info message
-         ierr = MPI_Send( &read_count, 1 , MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-         ierr = MPI_Send( &data_pos[reads_starting_pos], read_count, MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-         printf("FINISHED SENDING POSITIONAL READ DATA\n");
-
-         //SEND THE STRING OF READS
-         ierr = MPI_Send( &reads_this_stage, 1 , MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-         ierr = MPI_Send( &data[nucs_starting_pos], reads_this_stage, MPI_CHAR,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-       
-         //SEND MSA DATA
-         printf("SENDING MSA DATA\n");
-         ierr = MPI_Send( &avg_seq_len, 1 , MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-         ierr = MPI_Send( &total_seq_count, 1 , MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-         for(n = 0; n < total_seq_count; n++)
-         {
-           ierr = MPI_Send( &msa[n][0], avg_seq_len, MPI_CHAR,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-         }
-
-
-         read_count += avg_reads_per_process;
-         an_id++;
-         nucs_starting_pos = reads_this_stage;
-         reads_starting_pos += avg_reads_per_process;
-       }
-       */
+    {  
 
        if(an_id == num_procs - 1)
        {
@@ -324,63 +375,10 @@ int main ( int argc, char *argv[] ) {
          reads_starting_pos += avg_reads_per_process;
        }
 
-
-
-
-       /*
-       else if(an_id == num_procs - 1)
-       {
-         int last_reads = total_read_count - read_count;
-	 int last_nucs = reads_nuc_sum - nucs_starting_pos; 
-	 printf("leftover_reads to send = %d\n", last_reads);
-	 printf("leftover nucs = %d\n", last_nucs);
-         
-	 //nucs_starting_pos = reads_this_stage;
-         //reads_starting_pos = read_count;
-         printf("FINAL reads this stage = %d     current step = %d    for id = %d\n", last_nucs, last_reads, an_id);
-         printf("FINAL nucleotide starting position = %d     reads starting position = %d\n", nucs_starting_pos, reads_starting_pos);
-         //send info message
-         ierr = MPI_Send( &last_reads, 1 , MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-         ierr = MPI_Send( &data_pos[reads_starting_pos], last_reads, MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-         printf("FINISHED SENDING POSITIONAL READ DATA\n");
-
-         //SEND THE STRING OF READS
-         ierr = MPI_Send( &last_nucs, 1 , MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-         ierr = MPI_Send( &data[nucs_starting_pos], last_nucs, MPI_CHAR,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-
-         //SEND MSA DATA
-         printf("SENDING MSA DATA\n");
-         ierr = MPI_Send( &avg_seq_len, 1 , MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-         ierr = MPI_Send( &total_seq_count, 1 , MPI_INT,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-
-         for(n = 0; n < total_seq_count; n++)
-         {
-           ierr = MPI_Send( &msa[n][0], avg_seq_len, MPI_CHAR,
-           an_id, send_data_tag, MPI_COMM_WORLD);
-         }
-         
-
-
-
-
-       }
-       */
-
-
     }
 
   }
-        
+  */      
 
   }
 
@@ -551,7 +549,7 @@ int main ( int argc, char *argv[] ) {
             if(read_hash_array[0][j] == msa_hash_number)
             {
 //############################################################
-              //printf("FOUND HASH MATCH seq position:%d in loci: %d read kmer:%d of read %d     at ID = %d\n", i, n, j, z, my_id);
+              printf("FOUND HASH MATCH seq position:%d in loci: %d read kmer:%d of read %d     at ID = %d\n", i, n, j, z, my_id);
               //printf("%s\n", read);
 	      //match_count++;
 	      /*
